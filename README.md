@@ -1,10 +1,9 @@
-## NOTICE
-
-This repository contains the modified code for DRSS JV team for the 22-23 FTC Season.  The rest of the readme is unedited from the new SDK provided by FIRST.
-
 ## Welcome!
-This GitHub repository contains the source code that is used to build an Android app to control a *FIRST* Tech Challenge competition robot.  To use this SDK, download/clone the entire project to your local computer.
+This repository contains the modified code for DRSS JV team for the 22-23 FTC Season!
 
+When editing files in the repository, make sure you add an informative comment about the changes you create as well as your name.  Including thourough information is a coding best practice and allows other developers to ask question and fix bugs if recent commits cause issues.  Update this readme with more information about our robot capabilities as the season progresses.
+
+#### Information provided by FIRST
 ## Getting Started
 If you are new to robotics or new to the *FIRST* Tech Challenge, then you should consider reviewing the [FTC Blocks Tutorial](https://github.com/FIRST-Tech-Challenge/FtcRobotController/wiki/Blocks-Tutorial) to get familiar with how to use the control system:
 
@@ -12,22 +11,6 @@ If you are new to robotics or new to the *FIRST* Tech Challenge, then you should
 
 Even if you are an advanced Java programmer, it is helpful to start with the [FTC Blocks tutorial](https://github.com/FIRST-Tech-Challenge/FtcRobotController/wiki/Blocks-Tutorial), and then migrate to the [OnBot Java Tool](https://github.com/FIRST-Tech-Challenge/FtcRobotController/wiki/OnBot-Java-Tutorial) or to [Android Studio](https://github.com/FIRST-Tech-Challenge/FtcRobotController/wiki/Android-Studio-Tutorial) afterwards.
 
-## Downloading the Project
-If you are an Android Studio programmer, there are several ways to download this repo.  Note that if you use the Blocks or OnBot Java Tool to program your robot, then you do not need to download this repository.
-
-* If you are a git user, you can clone the most current version of the repository:
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;git clone https://github.com/FIRST-Tech-Challenge/FtcRobotController.git</p>
-
-* Or, if you prefer, you can use the "Download Zip" button available through the main repository page.  Downloading the project as a .ZIP file will keep the size of the download manageable.
-
-* You can also download the project folder (as a .zip or .tar.gz archive file) from the Downloads subsection of the [Releases](https://github.com/FIRST-Tech-Challenge/FtcRobotController/releases) page for this repository.
-
-* The Releases page also contains prebuilt APKs.
-
-Once you have downloaded and uncompressed (if needed) your folder, you can use Android Studio to import the folder  ("Import project (Eclipse ADT, Gradle, etc.)").
-
-## Getting Help
 ### User Documentation and Tutorials
 *FIRST* maintains online documentation with information and tutorials on how to use the *FIRST* Tech Challenge software and robot control system.  You can access this documentation using the following link:
 
@@ -52,7 +35,7 @@ Samples Folder: &nbsp;&nbsp; [/FtcRobotController/src/main/java/org/firstinspire
 
 The readme.md file located in the [/TeamCode/src/main/java/org/firstinspires/ftc/teamcode](TeamCode/src/main/java/org/firstinspires/ftc/teamcode) folder contains an explanation of the sample naming convention, and instructions on how to copy them to your own project space.
 
-# Release Information
+# Release Information (Provided by FIRST)
 
 ## Version 8.0 (20220907-131644)
 
