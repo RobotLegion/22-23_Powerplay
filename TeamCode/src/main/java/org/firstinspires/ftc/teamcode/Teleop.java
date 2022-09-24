@@ -27,12 +27,15 @@ public class Teleop extends LinearOpMode {
         bottomLeft = hardwareMap.dcMotor.get("BL"); //control hub port 3
 
         waitForStart();
+
         while(opModeIsActive()) {
+
             //Set gamepad
             float gamepad1LeftY = -gamepad1.left_stick_x; //Sets the gamepads left sticks y position to a float
-            float gamepad1LeftX = gamepad1.left_stick_y; //Sets the gameepads left sticks x position to a float
+            float gamepad1LeftX = gamepad1.left_stick_y; //Sets the gamepads left sticks x position to a float
             float gamepad1RightX = gamepad1.right_stick_x; //Sets the gamepads right sticks x position to a float
-            float gamepad2RightY = gamepad2.right_stick_y; // Sets the 2nd gamepads right sticks x position to a float;
+            float gamepad1RightY = gamepad1.right_stick_y; // Sets the 2nd gamepads right sticks x position to a float;
+
 
             //Mechanum formulas
             double TopRightSpeed = gamepad1LeftY + gamepad1LeftX + gamepad1RightX; //Combines the inputs of the sticks to clip their output to a value between 1 and -1
@@ -46,10 +49,17 @@ public class Teleop extends LinearOpMode {
             double bottomLeftCorrectedSpeed = Range.clip(Math.pow(BottomRightSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
             double bottomRightCorrectedSpeed = Range.clip(Math.pow(BottomLeftSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
 
+
             topRight.setPower(topRightCorrectedSpeed);
             bottomRight.setPower(bottomRightCorrectedSpeed);
             topLeft.setPower(topLeftCorrectedSpeed);
             bottomLeft.setPower(bottomLeftCorrectedSpeed);
+
+            telemetry.addData("x1", gamepad1.left_stick_x);
+            telemetry.addData("y1", gamepad1.left_stick_y);
+            telemetry.addData("x2", gamepad1.right_stick_x);
+            telemetry.addData("y2", gamepad1.right_stick_y);
+            telemetry.update();
         }
     }
 }
