@@ -14,7 +14,9 @@ public class Teleop extends LinearOpMode {
     DcMotor bottomLeft;
 
     double speed = 1;
-
+/* one or two moters, put them on RT  and LT
+*
+* color sensor for seeing yellow poles, using a range of RGB values focusing on red and green*/
 
     @Override
     public void runOpMode() throws InterruptedException {
