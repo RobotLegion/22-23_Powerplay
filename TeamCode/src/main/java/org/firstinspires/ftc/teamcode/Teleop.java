@@ -6,15 +6,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 //import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name = "FY22TeleOp", group = "TeleOp" )
+@TeleOp(name = "Fy22TeleOp", group = "TeleOp" )
 public class Teleop extends LinearOpMode {
     DcMotor topRight;
     DcMotor bottomRight;
     DcMotor topLeft;
     DcMotor bottomLeft;
 
-    double speed = 1;
-/* one or two moters, put them on RT  and LT
+    double speed = 1;   //change this variable to set speed (1 = 100%, 0.5 = 50%, etc)
+/* one or two moters, put  them on RT  and LT
 *
 * color sensor for seeing yellow poles, using a range of RGB values focusing on red and green*/
 
@@ -29,10 +29,10 @@ public class Teleop extends LinearOpMode {
         waitForStart();
         while(opModeIsActive()) {
             //Set gamepad
-            float gamepad1LeftY = -gamepad1.left_stick_x; //Sets the gamepads left sticks y position to a float
-            float gamepad1LeftX = gamepad1.left_stick_y; //Sets the gameepads left sticks x position to a float
-            float gamepad1RightX = gamepad1.right_stick_x; //Sets the gamepads right sticks x position to a float
-            float gamepad2RightY = gamepad2.right_stick_y; // Sets the 2nd gamepads right sticks x position to a float;
+            float gamepad1LeftY = gamepad1.left_stick_y; //Sets the gamepads left sticks y position to a float
+            float gamepad1LeftX = -gamepad1.left_stick_x; //Sets the gameepads left sticks x position to a float
+            float gamepad1RightX = -gamepad1.right_stick_x; //Sets the gamepads right sticks x position to a float
+            float gamepad2RightY = gamepad1.right_stick_y; // Sets the 2nd gamepads right sticks x position to a float;
 
             //Mechanum formulas
             double TopRightSpeed = gamepad1LeftY + gamepad1LeftX + gamepad1RightX; //Combines the inputs of the sticks to clip their output to a value between 1 and -1
