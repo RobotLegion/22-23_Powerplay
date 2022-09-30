@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 //import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 
 @TeleOp(name = "Fy22TeleOp", group = "TeleOp" )
 public class Teleop extends LinearOpMode {
@@ -12,6 +13,7 @@ public class Teleop extends LinearOpMode {
     DcMotor bottomRight;
     DcMotor topLeft;
     DcMotor bottomLeft;
+    ColorSensor color;
 
     double speed = 1;   //change this variable to set speed (1 = 100%, 0.5 = 50%, etc)
 /* one or two moters, put  them on RT  and LT
@@ -25,6 +27,7 @@ public class Teleop extends LinearOpMode {
         bottomRight = hardwareMap.dcMotor.get("BR"); //control hub port 1
         topLeft = hardwareMap.dcMotor.get("TL"); //control hub port 2
         bottomLeft = hardwareMap.dcMotor.get("BL"); //control hub port 3
+        color = hardwareMap.get(ColorSensor.class, "Color");
 
         waitForStart();
         while(opModeIsActive()) {
@@ -50,6 +53,13 @@ public class Teleop extends LinearOpMode {
             bottomRight.setPower(bottomRightCorrectedSpeed);
             topLeft.setPower(topLeftCorrectedSpeed);
             bottomLeft.setPower(bottomLeftCorrectedSpeed);
+
+            //Color Sensor
+            telemetry.addData("Red", color.red());
+            telemetry.addData("Green", color.green());
+            telemetry.addData("Blue", color.blue());
+            telemetry.update();
+
         }
     }
 }
