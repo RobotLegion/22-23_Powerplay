@@ -55,11 +55,64 @@ public class Teleop extends LinearOpMode {
             bottomLeft.setPower(bottomLeftCorrectedSpeed);
 
             //Color Sensor
-            telemetry.addData("Red", color.red());
-            telemetry.addData("Green", color.green());
-            telemetry.addData("Blue", color.blue());
-            telemetry.update();
+//            double colorMax = Math.max(Math.max(color.red(),color.green()),color.blue());
+//            double redValue = (double)color.red() / colorMax ;
+//            double greenValue = (double)color.green() / colorMax;
+//            double blueValue = (double)color.blue() / colorMax;
+//
+//            telemetry.addData("Red", redValue);
+//            telemetry.addData("Green", greenValue);
+//            telemetry.addData("Blue",blueValue);
+//            telemetry.update();
 
+
+
+            int redSum = 0;
+            int greenSum = 0;
+            int blueSum = 0;
+            for (int i = 0; i < 5; i++) {
+                redSum+=color.red();
+                greenSum+=color.green();
+                blueSum+=color.blue();
+            }
+            double red=(double)redSum/5.0;
+            double green=(double)greenSum/5.0;
+            double blue=(double)blueSum/5.0;
+
+            double colorMax = Math.max(Math.max(red,green),blue);
+            double redValue = red / colorMax ;
+            double greenValue = green / colorMax;
+            double blueValue = blue / colorMax;
+
+            boolean redCheck= false;
+            boolean greenCheck= false;
+            boolean blueCheck= false;
+            boolean poleCheck=false;
+
+            if(redValue<= 1.0 && redValue>=0.8) {
+                redCheck=true;
+            }
+
+            if(greenValue<= 1.0 && greenValue>=0.8) {
+                greenCheck=true;
+            }
+
+            if(blueValue>= 0.0 && blueValue<=0.5) {
+                blueCheck=true;
+            }
+//minimum color value
+            //green, magenta, turquoise
+            //blue & red 2
+
+            if(redCheck && greenCheck && blueCheck){
+                poleCheck=true;
+            }
+
+            telemetry.addData("Red", redValue);
+            telemetry.addData("Green", greenValue);
+            telemetry.addData("Blue",blueValue);
+            telemetry.addData("Pole", poleCheck);
+            telemetry.update();
         }
     }
 }
