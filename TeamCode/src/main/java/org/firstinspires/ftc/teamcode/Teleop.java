@@ -19,6 +19,67 @@ public class Teleop extends LinearOpMode {
 /* one or two moters, put  them on RT  and LT
 *
 * color sensor for seeing yellow poles, using a range of RGB values focusing on red and green*/
+public boolean isYellow(double r, double g, double b) {
+    //TODO - sometimes triggers true when a Red Cone is present
+    boolean redCheck= false;
+    boolean greenCheck= false;
+    boolean blueCheck= false;
+    if(r<= 1.0 && r>=0.8) {
+        redCheck=true;
+    }
+
+    if(g<= 1.0 && g>=0.8) {
+        greenCheck=true;
+    }
+
+    if(b>= 0.0 && b<=0.5) {
+        blueCheck=true;
+    }
+    if(redCheck && greenCheck && blueCheck){
+        return true;
+    }
+    else return false;
+}
+
+    public boolean isRed(double r, double g, double b) {
+        boolean redCheck= false;
+        boolean greenCheck= false;
+        boolean blueCheck= false;
+        if(r<= 1.0 && r>=0.8) {
+            redCheck=true;
+        }
+
+        if(g<= 0.8 && g>=0.3) {
+            greenCheck=true;
+        }
+
+        if(b>= 0.0 && b<=0.5) {
+            blueCheck=true;
+        }
+        if(redCheck && greenCheck && blueCheck){
+            return true;
+        }
+        else return false;
+    }
+    public boolean isBlue(double r, double g, double b) {
+        boolean redCheck= false;
+        boolean greenCheck= false;
+        boolean blueCheck= false;
+        if(r<= 0.8 && r>=0.0) {
+            redCheck=true;
+        }
+        if(g<= 1.0 && g>=0.5) {
+            greenCheck=true;
+        }
+
+        if(b>= 0.7 && b<=1.0) {
+            blueCheck=true;
+        }
+        if(redCheck && greenCheck && blueCheck){
+            return true;
+        }
+        else return false;
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -70,48 +131,44 @@ public class Teleop extends LinearOpMode {
             int redSum = 0;
             int greenSum = 0;
             int blueSum = 0;
+            int alphaSum = 0;
             for (int i = 0; i < 5; i++) {
                 redSum+=color.red();
                 greenSum+=color.green();
                 blueSum+=color.blue();
+                alphaSum+=color.alpha();
             }
             double red=(double)redSum/5.0;
             double green=(double)greenSum/5.0;
             double blue=(double)blueSum/5.0;
+            double alpha=(double)alphaSum/5.0;
+
 
             double colorMax = Math.max(Math.max(red,green),blue);
             double redValue = red / colorMax ;
             double greenValue = green / colorMax;
             double blueValue = blue / colorMax;
+            double alphaValue = alpha / colorMax;
 
-            boolean redCheck= false;
-            boolean greenCheck= false;
-            boolean blueCheck= false;
-            boolean poleCheck=false;
 
-            if(redValue<= 1.0 && redValue>=0.8) {
-                redCheck=true;
-            }
+            boolean poleCheck= isYellow(redValue, greenValue, blueValue);
+            boolean redConeCheck= isRed(redValue, greenValue, blueValue);
+            boolean blueConeCheck= isBlue(redValue, greenValue, blueValue);
 
-            if(greenValue<= 1.0 && greenValue>=0.8) {
-                greenCheck=true;
-            }
 
-            if(blueValue>= 0.0 && blueValue<=0.5) {
-                blueCheck=true;
-            }
 //minimum color value
             //green, magenta, turquoise
             //blue & red 2
 
-            if(redCheck && greenCheck && blueCheck){
-                poleCheck=true;
-            }
+
 
             telemetry.addData("Red", redValue);
             telemetry.addData("Green", greenValue);
             telemetry.addData("Blue",blueValue);
             telemetry.addData("Pole", poleCheck);
+            telemetry.addData("RedCone",redConeCheck);
+            telemetry.addData("BlueCone",blueConeCheck);
+            telemetry.addData("Alpha",alphaValue);
             telemetry.update();
         }
     }
