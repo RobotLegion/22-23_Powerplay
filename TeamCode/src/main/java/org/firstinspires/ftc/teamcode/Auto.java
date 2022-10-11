@@ -14,8 +14,7 @@ public class Auto extends LinearOpMode {
     //Magenta: 255 00 255 Parking 2
     //yellow: 255 255 00 Parking 3
     //Alpha threshold is about 300
-    //Flat colors
-    //Drive towards the signal "How do we know when we are 2cm from the cone?" yes
+       //Drive towards the signal "How do ......we know when we are 2cm from the cone?" yes
     //Read the color
     //use if statement to decide what to do when each color is read
 
@@ -50,6 +49,9 @@ public class Auto extends LinearOpMode {
         color = hardwareMap.get(ColorSensor.class, "Color");
 
 
+        // set the motor with the encoders to RUN_WITHOUT_ENCODERS
+        topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 
         waitForStart();
         while(opModeIsActive()) {
@@ -66,7 +68,10 @@ public class Auto extends LinearOpMode {
                 alphaAvg = alphaAverage();
             }*/
 
+            // add telemetry for frontRight.getCurrentPosition()
 
+            telemetry.addData("encoder-top-right", topRight.getCurrentPosition());
+            telemetry.update();
 
             if(alphaAvg>=200) {
                 topRight.setPower(0);

@@ -14,7 +14,6 @@ public class Teleop extends LinearOpMode {
     DcMotor topLeft;
     DcMotor bottomLeft;
     ColorSensor color;
-
     double speed = 1;   //change this variable to set speed (1 = 100%, 0.5 = 50%, etc)
     /* one or two moters, put  them on RT  and LT */
 
@@ -93,6 +92,7 @@ public class Teleop extends LinearOpMode {
         topLeft = hardwareMap.dcMotor.get("TL"); //control hub port 2
         bottomLeft = hardwareMap.dcMotor.get("BL"); //control hub port 3
         color = hardwareMap.get(ColorSensor.class, "Color");
+        topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
         while(opModeIsActive()) {
@@ -167,6 +167,8 @@ public class Teleop extends LinearOpMode {
             telemetry.addData("Green", greenAvg);
             telemetry.addData("Blue",blueAvg);
             telemetry.addData("Alpha",alphaAvg);
+            telemetry.addData("encoder-top-right", topRight.getCurrentPosition());
+
 
             if(alphaAvg>=300.0 ){
                 // color sensor is valid
