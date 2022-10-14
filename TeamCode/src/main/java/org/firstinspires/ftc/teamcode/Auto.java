@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 @Autonomous(name="autonomous", group="Robot")
 
 public class Auto extends LinearOpMode {
+    //Internet Password: Robotics 0145
     //Blue: 00,00,255 Parking 1
     //Magenta: 255 00 255 Parking 2
     //yellow: 255 255 00 Parking 3
@@ -21,7 +22,7 @@ public class Auto extends LinearOpMode {
 
     //if color=turquoise:
     //then back strafe left then forwards
-    //else if color=majenta:
+    //else if color=magenta:
     //drive forwards
     //else if color=green:
     //back, strafe right, forward
@@ -89,15 +90,27 @@ public class Auto extends LinearOpMode {
 
                 if(isParking1(redNorm, greenNorm, blueNorm)){
 
+                    topRight.setPower(-0.5);
+                    bottomRight.setPower(-0.5);
+                    topLeft.setPower(0.5);
+                    bottomLeft.setPower(0.5);
+                    runtime.reset();
+                    while(runtime.seconds() < 1.5) {
+                        telemetry.addData("Path", "Leg1: %4.1f S Elapsed", runtime.seconds());
+                        telemetry.update();
+                    }
+
                     topRight.setPower(0.5);
                     bottomRight.setPower(0.5);
                     topLeft.setPower(-0.5);
                     bottomLeft.setPower(-0.5);
                     runtime.reset();
-                    while(runtime.seconds() < 1.5){
+                    while(runtime.seconds() < 1.5) {
                         telemetry.addData("Path", "Leg1: %4.1f S Elapsed", runtime.seconds());
                         telemetry.update();
                     }
+
+
 
                     topRight.setPower(0);
                     bottomRight.setPower(0);
@@ -110,13 +123,23 @@ public class Auto extends LinearOpMode {
 
                 if(isParking3(redNorm, greenNorm, blueNorm)){
 
-                    topRight.setPower(0.5);
-                    bottomRight.setPower(0.5);
-                    topLeft.setPower(-0.5);
-                    bottomLeft.setPower(-0.5);
+                    topRight.setPower(0);
+                    bottomRight.setPower(0);
+                    topLeft.setPower(0);
+                    bottomLeft.setPower(0);
 
                     runtime.reset();
                     while(runtime.seconds() < 1.5){
+                        telemetry.addData("Path", "Leg1: %4.1f S Elapsed", runtime.seconds());
+                        telemetry.update();
+                    }
+
+                    topRight.setPower(0.5);
+                    bottomRight.setPower(-0.5);
+                    topLeft.setPower(0.5);
+                    bottomLeft.setPower(0.5);
+                    runtime.reset();
+                    while(runtime.seconds() < 0.2) {
                         telemetry.addData("Path", "Leg1: %4.1f S Elapsed", runtime.seconds());
                         telemetry.update();
                     }
@@ -130,13 +153,13 @@ public class Auto extends LinearOpMode {
                 }
 
                 else{
-                    topRight.setPower(0.5);
-                    bottomRight.setPower(0.5);
-                    topLeft.setPower(-0.5);
-                    bottomLeft.setPower(-0.5);
+                    topRight.setPower(0);
+                    bottomRight.setPower(0);
+                    topLeft.setPower(0);
+                    bottomLeft.setPower(0);
 
                     runtime.reset();
-                    while(runtime.seconds() < 1.5){
+                    while(runtime.seconds() < 10){
                         telemetry.addData("Path", "Leg1: %4.1f S Elapsed", runtime.seconds());
                         telemetry.update();
                     }
