@@ -37,6 +37,8 @@ public class Auto extends LinearOpMode {
     double feetToTicks = (19.2*28.0*304.8) / (Math.PI*96.0);
 
 
+
+
     ElapsedTime runtime = new ElapsedTime();
 
     double speed = 1;
@@ -53,22 +55,30 @@ public class Auto extends LinearOpMode {
         bottomLeft = hardwareMap.dcMotor.get("BL"); //control hub port 3
         color = hardwareMap.get(ColorSensor.class, "Color");
 
+        topLeft.setDirection(DcMotor.Direction.FORWARD);
+        topRight.setDirection(DcMotor.Direction.REVERSE);
+        bottomLeft.setDirection(DcMotor.Direction.FORWARD);
+        bottomRight.setDirection(DcMotor.Direction.REVERSE);
+
         topLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         topRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bottomLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bottomRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-//        topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        topLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bottomLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bottomRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+//        topLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        bottomLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        bottomRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
+
         while (opModeIsActive()) {
             double alphaAvg = alphaAverage();
             /*while(alphaAvg<200) {
@@ -82,10 +92,16 @@ public class Auto extends LinearOpMode {
 
                 alphaAvg = alphaAverage();
             }*/
-            topRight.setPower(-0.5);
-            bottomRight.setPower(-0.5);
-            topLeft.setPower(0.5);
-            bottomLeft.setPower(0.5);
+
+            //0.5 speed, 2.0 feet.
+            drive("forward",0.5f,2.0);
+
+            //0.5 speed, 1.0 foot.
+            drive("backward",0.5f,1.0);
+
+
+            //Strafe Left bottomRight (-0.5), topLeft (-0.5), topRight (0.5), bottomLeft (0.5)
+            //Stright all positve.
 
             telemetry.addData("top left", topLeft.getCurrentPosition());
             telemetry.addData("top right", topRight.getCurrentPosition());
@@ -202,6 +218,49 @@ public class Auto extends LinearOpMode {
 //                alphaAvg = alphaAverage();
 //            }
         }
+    }
+
+    public void drive(String direction, float speed, double target){
+        topLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        topRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bottomLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bottomRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        topLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        topRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bottomLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bottomRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        int tickTarget = (int)(target * feetToTicks);
+        if (direction == "forward"){
+            topLeft.setTargetPosition(tickTarget);
+            topRight.setTargetPosition(tickTarget);
+            bottomLeft.setTargetPosition(tickTarget);
+            bottomRight.setTargetPosition(tickTarget);
+        }
+        else if(direction == "backward"){
+            topLeft.setTargetPosition(-tickTarget);
+            topRight.setTargetPosition(-tickTarget);
+            bottomLeft.setTargetPosition(-tickTarget);
+            bottomRight.setTargetPosition(-tickTarget);
+        }
+        else if(direction == "left"){
+            topLeft.setTargetPosition(-tickTarget);
+            topRight.setTargetPosition(tickTarget);
+            bottomLeft.setTargetPosition(tickTarget);
+            bottomRight.setTargetPosition(-tickTarget);
+        }
+        else if(direction == "right"){
+            topLeft.setTargetPosition(tickTarget);
+            topRight.setTargetPosition(-tickTarget);
+            bottomLeft.setTargetPosition(-tickTarget);
+            bottomRight.setTargetPosition(tickTarget);
+        }
+
+        topRight.setPower(speed);
+        bottomRight.setPower(speed);
+        topLeft.setPower(speed);
+        bottomLeft.setPower(speed);
     }
 
     public double alphaAverage() {
