@@ -34,6 +34,9 @@ public class Auto extends LinearOpMode {
     DcMotor bottomLeft;
     ColorSensor color;
 
+    double feetToTicks = (19.2*28.0*304.8) / (Math.PI*96.0);
+
+
     ElapsedTime runtime = new ElapsedTime();
 
     double speed = 1;
@@ -55,10 +58,15 @@ public class Auto extends LinearOpMode {
         bottomLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bottomRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        topLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bottomLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bottomRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
         while (opModeIsActive()) {
@@ -74,6 +82,10 @@ public class Auto extends LinearOpMode {
 
                 alphaAvg = alphaAverage();
             }*/
+            topRight.setPower(-0.5);
+            bottomRight.setPower(-0.5);
+            topLeft.setPower(0.5);
+            bottomLeft.setPower(0.5);
 
             telemetry.addData("top left", topLeft.getCurrentPosition());
             telemetry.addData("top right", topRight.getCurrentPosition());
