@@ -310,23 +310,26 @@ public class Auto extends LinearOpMode {
     // check if the input color sensor r,g,b values represent parking zone 1
     public boolean isParking1(double r, double g, double b) {
 
+        // perfect reading:   r=1.00, g=0.50, b=0.70
+        // imperfect reading: r=0.70, g=1.00, b=0.900
+
         // initalize all check variables to false
         boolean redCheck = false;
         boolean greenCheck = false;
         boolean blueCheck = false;
 
-        // check if r is in the range 0.8-1.0
-        if (r >= 0.8 && r <= 1.0) {
+        // check if r is in the range
+        if (r >= 0.6 && r <= 1.0) {
             redCheck = true;
         }
 
-        // check if g is in the range 0.3-0.7
-        if (g >= 0.3 && g <= 0.7) {
+        // check if g is in the range
+        if (g >= 0.3 && g <= 1.0) {
             greenCheck = true;
         }
 
-        // check if b is in the range 0.5-0.8
-        if (b >= 0.5 && b <= 0.8) {
+        // check if b is in the range
+        if (b >= 0.5 && b <= 1.0) {
             blueCheck = true;
         }
 
@@ -340,23 +343,26 @@ public class Auto extends LinearOpMode {
     // check if the input color sensor r,g,b values represent parking zone 3
     public boolean isParking3(double r, double g, double b) {
 
+        // perfect reading:   r=0.56, g=1.00, b=0.27
+        // imperfect reading: r=0.58, g=1.00, b=0.64
+
         // initalize all check variables to false
         boolean redCheck = false;
         boolean greenCheck = false;
         boolean blueCheck = false;
 
-        // check if r is in the range 0.3-0.7
+        // check if r is in the range
         if (r >= 0.3 && r <= 0.7) {
             redCheck = true;
         }
 
-        // check if g is in the range 0.8-1.0
+        // check if g is in the range
         if (g >= 0.8 && g <= 1.0 ) {
             greenCheck = true;
         }
 
-        // check if b is in the range 0.0-0.4
-        if (b >= 0.0 && b <= 0.4) {
+        // check if b is in the range
+        if (b >= 0.1 && b <= 0.8) {
             blueCheck = true;
         }
 

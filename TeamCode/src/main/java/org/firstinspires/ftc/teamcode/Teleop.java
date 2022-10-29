@@ -18,45 +18,31 @@ public class Teleop extends LinearOpMode {
     /* one or two moters, put  them on RT  and LT */
 
 
-    //color sensor for seeing yellow poles, using a range of RGB values focusing on red and green
-    public boolean isPole(double r, double g, double b) {
-        //TODO - sometimes triggers true when a Red Cone is present
-        boolean redCheck= false;
-        boolean greenCheck= false;
-        boolean blueCheck= false;
-        if(r<= 0.9 && r>=0.6) {
-            redCheck=true;
-        }
-
-        if(g<= 1.0 && g>=0.8) {
-            greenCheck=true;
-        }
-
-        if(b>= 0.0 && b<=0.5) {
-            blueCheck=true;
-        }
-        if(redCheck && greenCheck && blueCheck){
-            return true;
-        }
-        else return false;
-    }
-
     //color sensor for seeing red cone, using a range of RGB values focusing on red and green
     public boolean isRedCone(double r, double g, double b) {
-        boolean redCheck= false;
-        boolean greenCheck= false;
-        boolean blueCheck= false;
-        if(r<= 1.0 && r>=0.9) {
+
+        // initalize all check variables to false
+        boolean redCheck = false;
+        boolean greenCheck = false;
+        boolean blueCheck = false;
+
+        // if r is in the range
+        if(r >= 0.9 && r <= 1.0) {
             redCheck=true;
         }
 
-        if(g<= 0.7 && g>=0.4) {
+        // if g is in the range
+        if(g >= 0.4 && g <= 0.7) {
             greenCheck=true;
         }
 
-        if(b>= 0.0 && b<=0.4) {
+        // if b is in the range
+        if(b >= 0.0 && b <= 0.4) {
             blueCheck=true;
         }
+
+        // if all color checks are true, return true
+        // otherwise, return false
         if(redCheck && greenCheck && blueCheck){
             return true;
         }
@@ -65,19 +51,60 @@ public class Teleop extends LinearOpMode {
 
     //color sensor for seeing blue cone, using a range of RGB values focusing on red and green
     public boolean isBlueCone(double r, double g, double b) {
-        boolean redCheck= false;
-        boolean greenCheck= false;
-        boolean blueCheck= false;
-        if(r<= 0.8 && r>=0.0) {
+
+        // initalize all check variables to false
+        boolean redCheck = false;
+        boolean greenCheck = false;
+        boolean blueCheck = false;
+
+        // if r is in the range
+        if(r >= 0.0 && r <= 0.8) {
             redCheck=true;
         }
-        if(g<= 1.0 && g>=0.5) {
+
+        // if g is in the range
+        if(g >= 0.5 && g <= 1.0) {
             greenCheck=true;
         }
 
-        if(b>= 0.7 && b<=1.0) {
+        // if b is in the range
+        if(b >= 0.7 && b <= 1.0) {
             blueCheck=true;
         }
+
+        // if all color checks are true, return true
+        // otherwise, return false
+        if(redCheck && greenCheck && blueCheck){
+            return true;
+        }
+        else return false;
+    }
+
+    //color sensor for seeing yellow poles, using a range of RGB values focusing on red and green
+    public boolean isPole(double r, double g, double b) {
+
+        // initalize all check variables to false
+        boolean redCheck = false;
+        boolean greenCheck = false;
+        boolean blueCheck = false;
+
+        // if r is in the range
+        if(r >= 0.6 && r <= 0.9) {
+            redCheck=true;
+        }
+
+        // if g is in the range
+        if(g >= 0.8 && g <= 1.0) {
+            greenCheck=true;
+        }
+
+        // if b is in the range
+        if(b >= 0.0 && b <= 0.5) {
+            blueCheck=true;
+        }
+
+        // if all color checks are true, return true
+        // otherwise, return false
         if(redCheck && greenCheck && blueCheck){
             return true;
         }
