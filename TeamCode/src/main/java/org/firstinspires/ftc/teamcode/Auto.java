@@ -373,3 +373,4 @@ public class Auto extends LinearOpMode {
         } else return false;
     }
 }
+

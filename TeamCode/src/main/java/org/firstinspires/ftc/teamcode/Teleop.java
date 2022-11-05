@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-//import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
@@ -13,6 +13,9 @@ public class Teleop extends LinearOpMode {
     DcMotor bottomRight;
     DcMotor topLeft;
     DcMotor bottomLeft;
+    Servo claw;
+    DcMotor Rightlift;
+    DcMotor Leftlift;
     ColorSensor color;
     double speed = 1;   //change this variable to set speed (1 = 100%, 0.5 = 50%, etc)
     /* one or two moters, put  them on RT  and LT */
@@ -111,6 +114,15 @@ public class Teleop extends LinearOpMode {
         else return false;
     }
 
+    public void ClawOpen(){
+        claw.setPosition(0);
+    }
+
+    public void ClawClose(){
+        claw.setPosition(1);
+    }
+//Right bumper (RB) on the gamepad for the claw.
+
     @Override
     public void runOpMode() throws InterruptedException {
         //hardware maps
@@ -118,16 +130,34 @@ public class Teleop extends LinearOpMode {
         bottomRight = hardwareMap.dcMotor.get("BR"); //control hub port 1
         topLeft = hardwareMap.dcMotor.get("TL"); //control hub port 2
         bottomLeft = hardwareMap.dcMotor.get("BL"); //control hub port 3
+        claw = hardwareMap.servo.get("claw"); //servo port 0
         color = hardwareMap.get(ColorSensor.class, "Color");
         topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        claw.scaleRange(0, 0.55);
 
         waitForStart();
+        ClawOpen();
         while(opModeIsActive()) {
             //Set gamepad
             float gamepad1LeftY = gamepad1.left_stick_y; //Sets the gamepads left sticks y position to a float
             float gamepad1LeftX = -gamepad1.left_stick_x; //Sets the gameepads left sticks x position to a float
             float gamepad1RightX = -gamepad1.right_stick_x; //Sets the gamepads right sticks x position to a float
             float gamepad2RightY = gamepad1.right_stick_y; // Sets the 2nd gamepads right sticks x position to a float;
+            boolean gamepad2RB = gamepad2.right_bumper; //when the button is pressed toggle claw
+
+
+            //clawCheck
+
+            if (gamepad2RB) {
+                if(claw.getPosition()>0.5){
+                    ClawOpen();
+                }
+                else{
+                    ClawClose();
+                }
+                Thread.sleep(150);
+            }
+
 
             //Mechanum formulas
             double TopRightSpeed = gamepad1LeftY + gamepad1LeftX + gamepad1RightX; //Combines the inputs of the sticks to clip their output to a value between 1 and -1
