@@ -14,12 +14,46 @@ public class Teleop extends LinearOpMode {
     DcMotor topLeft;
     DcMotor bottomLeft;
     Servo claw;
-    DcMotor Rightlift;
-    DcMotor Leftlift;
+    DcMotor Liftright;
+    DcMotor Liftleft;
     ColorSensor color;
     double speed = 1;   //change this variable to set speed (1 = 100%, 0.5 = 50%, etc)
-    /* one or two moters, put  them on RT  and LT */
+    /* one or two motors, put  them on RT  and LT */
 
+
+
+    // Functions for Lift
+
+        public boolean Conelift(){
+
+        telemetry.addLine("Conelift");
+        telemetry.update();
+        return true;
+        }
+
+        public boolean Groundlift(){
+            telemetry.addLine("Groundlift");
+            telemetry.update();
+            return true;
+        }
+
+        public boolean Smalllift(){
+            telemetry.addLine("Smalllift");
+            telemetry.update();
+            return true;
+        }
+
+        public boolean Mediumlift(){
+            telemetry.addLine("Mediumlift");
+            telemetry.update();
+            return true;
+        }
+
+        public boolean Highlift(){
+            telemetry.addLine("Highlift");
+            telemetry.update();
+            return true;
+        }
 
     //color sensor for seeing red cone, using a range of RGB values focusing on red and green
     public boolean isRedCone(double r, double g, double b) {
@@ -131,6 +165,8 @@ public class Teleop extends LinearOpMode {
         topLeft = hardwareMap.dcMotor.get("TL"); //control hub port 2
         bottomLeft = hardwareMap.dcMotor.get("BL"); //control hub port 3
         claw = hardwareMap.servo.get("claw"); //servo port 0
+        Liftleft = hardwareMap.dcMotor.get("Liftleft"); // port1
+        Liftright = hardwareMap.dcMotor.get("Liftright"); //port0
         color = hardwareMap.get(ColorSensor.class, "Color");
         topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         claw.scaleRange(0, 0.55);
@@ -142,13 +178,18 @@ public class Teleop extends LinearOpMode {
             float gamepad1LeftY = gamepad1.left_stick_y; //Sets the gamepads left sticks y position to a float
             float gamepad1LeftX = -gamepad1.left_stick_x; //Sets the gameepads left sticks x position to a float
             float gamepad1RightX = -gamepad1.right_stick_x; //Sets the gamepads right sticks x position to a float
-            float gamepad2RightY = gamepad1.right_stick_y; // Sets the 2nd gamepads right sticks x position to a float;
-            boolean gamepad2RB = gamepad2.right_bumper; //when the button is pressed toggle claw
-
+            float gamepad1RightY = gamepad1.right_stick_y; // Sets the 2nd gamepads right sticks x position to a float;
+            boolean gamepad2LB = gamepad2.left_bumper; //when the button is pressed toggle claw //We changed right bumper to left bumper because we want right bumper for high junction
+            //lift position buttons
+            boolean gamepad2RB = gamepad2.right_bumper; //when the right bumper is pressed it moves the lift to the high junction position
+            boolean gamepad2Y = gamepad2.y; //when the y button is pressed to the small junction position
+            boolean gamepad2X = gamepad2.x; //when the x button is pressed to the ground junction position
+            boolean gamepad2A = gamepad2.a; //when the a button is pressed to the cone grabbing position
+            boolean gamepad2B = gamepad2.b; //when the b button is pressed to the medium junction position
 
             //clawCheck
 
-            if (gamepad2RB) {
+            if (gamepad2LB) {
                 if(claw.getPosition()>0.5){
                     ClawOpen();
                 }
@@ -156,6 +197,28 @@ public class Teleop extends LinearOpMode {
                     ClawClose();
                 }
                 Thread.sleep(150);
+            }
+
+            //Lift
+
+            if (gamepad2RB == true) {
+                Highlift();
+            }
+
+            if (gamepad2Y == true) {
+                Smalllift();
+            }
+
+            if (gamepad2X == true) {
+                Groundlift();
+            }
+
+            if (gamepad2A == true) {
+                Conelift();
+            }
+
+            if (gamepad2B == true) {
+                Mediumlift();
             }
 
 
