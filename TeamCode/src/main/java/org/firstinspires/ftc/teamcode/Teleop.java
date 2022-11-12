@@ -31,7 +31,6 @@ public class Teleop extends LinearOpMode {
     int Highliftlevel = 400;
     int Currentliftlevel = 0;
 
-
     // Functions for Lift
 
         public boolean Conelift(){
@@ -319,6 +318,7 @@ public class Teleop extends LinearOpMode {
             telemetry.addData("encoder-top-right", topRight.getCurrentPosition());
             telemetry.addData("Liftleft", Liftleft.getCurrentPosition());
             telemetry.addData("Liftright", Liftright.getCurrentPosition());
+
 
 
             if(alphaAvg>=300.0 ){

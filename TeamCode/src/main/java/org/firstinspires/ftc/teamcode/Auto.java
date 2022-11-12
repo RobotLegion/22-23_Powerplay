@@ -28,6 +28,9 @@ public class Auto extends LinearOpMode {
     //drive forwards
     //else if color=green:
     //back, strafe right, forward
+    //Clockwise = -90
+    //Counter-clockwise = 90
+    //Behind = -180
 
     // define variables for motors
     DcMotor topRight;
@@ -242,7 +245,12 @@ public class Auto extends LinearOpMode {
         // stop motors
         stopMotors();
     }
+    //Clockwise = -90
+    //Counter-clockwise = 90
+    //Behind = -180
+    public void rotate(double degree, float speed) {
 
+    }
     // returns an average alpha value
     public double alphaAverage() {
 
