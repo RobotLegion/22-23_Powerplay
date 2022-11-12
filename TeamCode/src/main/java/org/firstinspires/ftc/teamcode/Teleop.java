@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.ButtonReader;
 
 @TeleOp(name = "Fy22TeleOp", group = "TeleOp" )
 public class Teleop extends LinearOpMode {
@@ -20,38 +24,44 @@ public class Teleop extends LinearOpMode {
     double speed = 1;   //change this variable to set speed (1 = 100%, 0.5 = 50%, etc)
     /* one or two motors, put  them on RT  and LT */
 
+    int Coneliftlevel = 100;
+    int Groundliftlevel = 150;
+    int Smallliftlevel = 200;
+    int Mediumliftlevel = 300;
+    int Highliftlevel = 400;
+    int Currentliftlevel = 0;
 
 
     // Functions for Lift
 
         public boolean Conelift(){
 
-        telemetry.addLine("Conelift");
-        telemetry.update();
+            Liftleft.setTargetPosition(Coneliftlevel);
+            Liftright.setTargetPosition(Coneliftlevel);
         return true;
         }
 
         public boolean Groundlift(){
-            telemetry.addLine("Groundlift");
-            telemetry.update();
+            Liftleft.setTargetPosition(Groundliftlevel);
+            Liftright.setTargetPosition(Groundliftlevel);
             return true;
         }
 
         public boolean Smalllift(){
-            telemetry.addLine("Smalllift");
-            telemetry.update();
+            Liftleft.setTargetPosition(Smallliftlevel);
+            Liftright.setTargetPosition(Smallliftlevel);
             return true;
         }
 
         public boolean Mediumlift(){
-            telemetry.addLine("Mediumlift");
-            telemetry.update();
+            Liftleft.setTargetPosition(Mediumliftlevel );
+            Liftright.setTargetPosition(Mediumliftlevel );
             return true;
         }
 
         public boolean Highlift(){
-            telemetry.addLine("Highlift");
-            telemetry.update();
+            Liftleft.setTargetPosition(Highliftlevel );
+            Liftright.setTargetPosition(Highliftlevel);
             return true;
         }
 
@@ -171,53 +181,72 @@ public class Teleop extends LinearOpMode {
         topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         claw.scaleRange(0, 0.55);
 
+        Liftleft.setDirection(DcMotor.Direction.FORWARD);
+        Liftright.setDirection(DcMotor.Direction.FORWARD);
+        Liftleft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Liftright.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Liftleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Liftright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Liftleft.setTargetPosition(0);
+        Liftright.setTargetPosition(0);
+        Liftleft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Liftright.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Liftleft.setPower(0.3);
+        Liftright.setPower(0.3);
+
+        GamepadEx myGamepad2 = new GamepadEx(gamepad2);
+        GamepadEx myGamepad1 = new GamepadEx(gamepad1);
+
         waitForStart();
         ClawOpen();
         while(opModeIsActive()) {
-            //Set gamepad
+//            //Set gamepad
             float gamepad1LeftY = gamepad1.left_stick_y; //Sets the gamepads left sticks y position to a float
             float gamepad1LeftX = -gamepad1.left_stick_x; //Sets the gameepads left sticks x position to a float
             float gamepad1RightX = -gamepad1.right_stick_x; //Sets the gamepads right sticks x position to a float
             float gamepad1RightY = gamepad1.right_stick_y; // Sets the 2nd gamepads right sticks x position to a float;
-            boolean gamepad2LB = gamepad2.left_bumper; //when the button is pressed toggle claw //We changed right bumper to left bumper because we want right bumper for high junction
-            //lift position buttons
-            boolean gamepad2RB = gamepad2.right_bumper; //when the right bumper is pressed it moves the lift to the high junction position
-            boolean gamepad2Y = gamepad2.y; //when the y button is pressed to the small junction position
-            boolean gamepad2X = gamepad2.x; //when the x button is pressed to the ground junction position
-            boolean gamepad2A = gamepad2.a; //when the a button is pressed to the cone grabbing position
-            boolean gamepad2B = gamepad2.b; //when the b button is pressed to the medium junction position
+//            boolean gamepad2LB = gamepad2.left_bumper; //when the button is pressed toggle claw //We changed right bumper to left bumper because we want right bumper for high junction
+//            //lift position buttons
+//            boolean gamepad2RB = gamepad2.right_bumper; //when the right bumper is pressed it moves the lift to the high junction position
+//            boolean gamepad2Y = gamepad2.y; //when the y button is pressed to the small junction position
+//            boolean gamepad2X = gamepad2.x; //when the x button is pressed to the ground junction position
+//            boolean gamepad2A = gamepad2.a; //when the a button is pressed to the cone grabbing position
+//            boolean gamepad2B = gamepad2.b; //when the b button is pressed to the medium junction position
 
             //clawCheck
 
-            if (gamepad2LB) {
+            myGamepad1.readButtons();
+            myGamepad2.readButtons();
+
+            if (myGamepad2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+
                 if(claw.getPosition()>0.5){
                     ClawOpen();
                 }
                 else{
                     ClawClose();
                 }
-                Thread.sleep(150);
             }
 
             //Lift
 
-            if (gamepad2RB == true) {
+            if (myGamepad2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
                 Highlift();
             }
 
-            if (gamepad2Y == true) {
+            if (myGamepad2.wasJustPressed(GamepadKeys.Button.Y)) {
                 Smalllift();
             }
 
-            if (gamepad2X == true) {
+            if (myGamepad2.wasJustPressed(GamepadKeys.Button.X)) {
                 Groundlift();
             }
 
-            if (gamepad2A == true) {
+            if (myGamepad2.wasJustPressed(GamepadKeys.Button.A)) {
                 Conelift();
             }
 
-            if (gamepad2B == true) {
+            if (myGamepad2.wasJustPressed(GamepadKeys.Button.B)) {
                 Mediumlift();
             }
 
@@ -288,6 +317,8 @@ public class Teleop extends LinearOpMode {
             telemetry.addData("Blue",blueAvg);
             telemetry.addData("Alpha",alphaAvg);
             telemetry.addData("encoder-top-right", topRight.getCurrentPosition());
+            telemetry.addData("Liftleft", Liftleft.getCurrentPosition());
+            telemetry.addData("Liftright", Liftright.getCurrentPosition());
 
 
             if(alphaAvg>=300.0 ){
