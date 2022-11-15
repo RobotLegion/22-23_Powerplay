@@ -1,12 +1,18 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
 
 @Autonomous(name="autonomous", group="Robot")
 
@@ -38,6 +44,10 @@ public class Auto extends LinearOpMode {
     DcMotor topLeft;
     DcMotor bottomLeft;
 
+    BNO055IMU imu;
+    Orientation angles = new Orientation();
+    double globalAngle, power = .30, correction;
+
     // define variable for color sensor
     ColorSensor color;
 
@@ -58,6 +68,84 @@ public class Auto extends LinearOpMode {
 
     ElapsedTime runtime = new ElapsedTime();
 
+    public void resetAngle()
+    {
+        lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+        globalAngle = 0;
+    }
+    public double rotate(int degrees, double power)
+    {
+        double  leftPower, rightPower;
+
+        // restart imu movement tracking.
+        resetAngle();
+
+        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
+        // clockwise (right).
+
+        if (degrees < 0)
+        {   // turn right.
+            leftPower = power;
+            rightPower = -power;
+        }
+        else if (degrees > 0)
+        {   // turn left.
+            leftPower = -power;
+            rightPower = power;
+        }
+        else return;
+
+        // set power to rotate.
+        topRight.setPower(leftPower);
+        bottomLeft.setPower(rightPower);
+        topLeft.setPower(leftPower);
+        bottomRight.setPower(rightPower);
+
+        public double getAngle() {
+            // We experimentally determined the Z axis is the axis we want to use for heading angle.
+            // We have to process the angle because the imu works in euler angles so the Z axis is
+            // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
+            // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
+
+            Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+            double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
+
+            if (deltaAngle < -180)
+                deltaAngle += 360;
+            else if (deltaAngle > 180)
+                deltaAngle -= 360;
+
+            globalAngle += deltaAngle;
+
+            lastAngles = angles;
+
+            return globalAngle;
+        }
+
+
+        // rotate until turn is completed.
+        if (degrees < 0)
+        {
+            // On right turn we have to get off zero first.
+            while (opModeIsActive() && getAngle() == 0) {}
+
+            while (opModeIsActive() && getAngle() > degrees) {}
+        }
+        else    // left turn.
+            while (opModeIsActive() && getAngle() < degrees) {}
+
+        // turn the motors off.
+        rightMotor.setPower(0);
+        leftMotor.setPower(0);
+
+        // wait for rotation to stop.
+        sleep(1000);
+
+        // reset angle tracking on new heading.
+        resetAngle();
+    }
 
     public void runOpMode() {
         // Hardware Maps
@@ -86,8 +174,30 @@ public class Auto extends LinearOpMode {
         bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.mode                = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled      = false;
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
+
+        telemetry.addData("Mode", "calibrating...");
+        telemetry.update();
+
+        // make sure the imu gyro is calibrated before continuing.
+        while (!isStopRequested() && !imu.isGyroCalibrated()) {
+            sleep(50);
+            idle();
+        }
+
+        telemetry.addData("Mode", "waiting for start");
+        telemetry.addData("imu calib status", imu.getCalibrationStatus().toString());
+        telemetry.update();
+
         // Wait for start button press on Driver Station
         waitForStart();
+
 
         // While the mode is active (has not been stopped / time has not expired)
         if (opModeIsActive()) {
@@ -133,6 +243,9 @@ public class Auto extends LinearOpMode {
                 // drive forward at 0.2 speed to position T (relative)
                 drive("forward",0.2f,T-c);
 
+                //At position T turn cw 135 deg
+                rotate(135, 0.8);
+
                 // drive left at 0.4 speed to position S (relative)
                 drive("left",0.4f,S);
 
@@ -174,6 +287,30 @@ public class Auto extends LinearOpMode {
         bottomLeft.setPower(0);
     }
 
+    public void rotate(double degree, double speed) {
+
+//        if (degree > 0.0) {
+//            telemetry.addData("rotate counter clockwise to", degree);
+//        }
+//        else {
+//            telemetry.addData("rotate clockwise to", degree);
+//        }
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+        double delta =Math.abs( degree-angles.firstAngle);
+
+        while (delta > 0.0 ){
+            telemetry.addData("rotate", delta);
+            telemetry.update();
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+            delta =Math.abs( degree-angles.firstAngle);
+        }
+        telemetry.addLine("stop rotating");
+        telemetry.update();
+
+
+    }
     // Direction=forward/backward/left/right
     // Speed=0.0-1.0
     // Target=Feet
