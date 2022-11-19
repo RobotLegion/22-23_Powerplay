@@ -31,6 +31,8 @@ public class Teleop extends LinearOpMode {
     int Highliftlevel = 400;
     int Currentliftlevel = 0;
 
+    double LiftPower;
+
     // Functions for Lift
 
         public boolean Conelift(){
@@ -182,16 +184,16 @@ public class Teleop extends LinearOpMode {
 
         Liftleft.setDirection(DcMotor.Direction.FORWARD);
         Liftright.setDirection(DcMotor.Direction.FORWARD);
-        Liftleft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Liftright.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Liftleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        Liftright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        Liftleft.setTargetPosition(0);
-        Liftright.setTargetPosition(0);
-        Liftleft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Liftright.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Liftleft.setPower(0.3);
-        Liftright.setPower(0.3);
+//        Liftleft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        Liftright.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Liftleft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Liftright.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        Liftleft.setTargetPosition(0);
+//        Liftright.setTargetPosition(0);
+//        Liftleft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        Liftright.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        Liftleft.setPower(0.3);
+//        Liftright.setPower(0.3);
 
         GamepadEx myGamepad2 = new GamepadEx(gamepad2);
         GamepadEx myGamepad1 = new GamepadEx(gamepad1);
@@ -203,7 +205,11 @@ public class Teleop extends LinearOpMode {
             float gamepad1LeftY = gamepad1.left_stick_y; //Sets the gamepads left sticks y position to a float
             float gamepad1LeftX = -gamepad1.left_stick_x; //Sets the gameepads left sticks x position to a float
             float gamepad1RightX = -gamepad1.right_stick_x; //Sets the gamepads right sticks x position to a float
-            float gamepad1RightY = gamepad1.right_stick_y; // Sets the 2nd gamepads right sticks x position to a float;
+            float gamepad1RightY = gamepad1.right_stick_y; // Sets the 1st gamepads right sticks x position to a float;
+            float gamepad2LeftY = gamepad2.left_stick_y; //Lift for demo Up
+            float gamepadLeftY = gamepad2.left_stick_y; //Lift for demo Down
+            float gamepad2LeftX = -gamepad2.left_stick_x; //Lift so you don't have to be perfectly straight on the joystick
+            float gamepad2RightY = -gamepad2.right_stick_y; //Lift so you don't have to be perfectly straight on the joystick
 //            boolean gamepad2LB = gamepad2.left_bumper; //when the button is pressed toggle claw //We changed right bumper to left bumper because we want right bumper for high junction
 //            //lift position buttons
 //            boolean gamepad2RB = gamepad2.right_bumper; //when the right bumper is pressed it moves the lift to the high junction position
@@ -228,25 +234,41 @@ public class Teleop extends LinearOpMode {
             }
 
             //Lift
+//
+//            if (myGamepad2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+//                Highlift();
+//            }
+//
+//            if (myGamepad2.wasJustPressed(GamepadKeys.Button.Y)) {
+//                Smalllift();
+//            }
+//
+//            if (myGamepad2.wasJustPressed(GamepadKeys.Button.X)) {
+//                Groundlift();
+//            }
+//
+//            if (myGamepad2.wasJustPressed(GamepadKeys.Button.A)) {
+//                Conelift();
+//            }
+//
+//            if (myGamepad2.wasJustPressed(GamepadKeys.Button.B)) {
+//                Mediumlift();
+//            }
 
-            if (myGamepad2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-                Highlift();
+            //Lift with joysticks
+
+            if(gamepad2RightY > 0.05) {
+                LiftPower = -0.25;
+                telemetry.addLine("Up");
+                telemetry.update();
             }
-
-            if (myGamepad2.wasJustPressed(GamepadKeys.Button.Y)) {
-                Smalllift();
+           else if(gamepad2RightY < -0.05) {
+               LiftPower = 0.25;
+                telemetry.addLine("Down");
+                telemetry.update();
             }
-
-            if (myGamepad2.wasJustPressed(GamepadKeys.Button.X)) {
-                Groundlift();
-            }
-
-            if (myGamepad2.wasJustPressed(GamepadKeys.Button.A)) {
-                Conelift();
-            }
-
-            if (myGamepad2.wasJustPressed(GamepadKeys.Button.B)) {
-                Mediumlift();
+           else {
+               LiftPower = 0.0;
             }
 
 
@@ -266,6 +288,8 @@ public class Teleop extends LinearOpMode {
             bottomRight.setPower(bottomRightCorrectedSpeed);
             topLeft.setPower(topLeftCorrectedSpeed);
             bottomLeft.setPower(bottomLeftCorrectedSpeed);
+            Liftleft.setPower(LiftPower);
+            Liftright.setPower(LiftPower);
 
             //Color Sensor
 //            double colorMax = Math.max(Math.max(color.red(),color.green()),color.blue());
