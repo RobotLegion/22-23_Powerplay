@@ -30,6 +30,8 @@ public class Teleop extends LinearOpMode {
     int Mediumliftlevel = 300;
     int Highliftlevel = 400;
     int Currentliftlevel = 0;
+    double speedfactor = 1.0;
+    //To Do: modify speed factor to the value of 0.5 when RB button is pressed.
 
     double LiftPower;
 
@@ -166,7 +168,7 @@ public class Teleop extends LinearOpMode {
     public void ClawClose(){
         claw.setPosition(1);
     }
-//Right bumper (RB) on the gamepad for the claw.
+//Left bumper (LB) on the gamepad for the claw.
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -258,12 +260,12 @@ public class Teleop extends LinearOpMode {
             //Lift with joysticks
 
             if(gamepad2RightY > 0.05) {
-                LiftPower = -0.25;
+                LiftPower = -0.6;
                 telemetry.addLine("Up");
                 telemetry.update();
             }
            else if(gamepad2RightY < -0.05) {
-               LiftPower = 0.25;
+               LiftPower = 0.6;
                 telemetry.addLine("Down");
                 telemetry.update();
             }
@@ -284,12 +286,14 @@ public class Teleop extends LinearOpMode {
             double bottomLeftCorrectedSpeed = Range.clip(Math.pow(BottomRightSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
             double bottomRightCorrectedSpeed = Range.clip(Math.pow(BottomLeftSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
 
-            topRight.setPower(topRightCorrectedSpeed);
-            bottomRight.setPower(bottomRightCorrectedSpeed);
-            topLeft.setPower(topLeftCorrectedSpeed);
-            bottomLeft.setPower(bottomLeftCorrectedSpeed);
+            topRight.setPower(topRightCorrectedSpeed*speedfactor);
+            bottomRight.setPower(bottomRightCorrectedSpeed*speedfactor);
+            topLeft.setPower(topLeftCorrectedSpeed*speedfactor);
+            bottomLeft.setPower(bottomLeftCorrectedSpeed*speedfactor);
             Liftleft.setPower(LiftPower);
             Liftright.setPower(LiftPower);
+
+
 
             //Color Sensor
 //            double colorMax = Math.max(Math.max(color.red(),color.green()),color.blue());
