@@ -260,12 +260,12 @@ public class Teleop extends LinearOpMode {
             //Lift with joysticks
 
             if(gamepad2RightY > 0.05) {
-                LiftPower = -0.6;
+                LiftPower = -0.5;
                 telemetry.addLine("Up");
                 telemetry.update();
             }
            else if(gamepad2RightY < -0.05) {
-               LiftPower = 0.6;
+               LiftPower = 0.5;
                 telemetry.addLine("Down");
                 telemetry.update();
             }

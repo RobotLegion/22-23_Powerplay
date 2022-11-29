@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
@@ -43,11 +44,16 @@ public class Auto extends LinearOpMode {
     DcMotor bottomRight;
     DcMotor topLeft;
     DcMotor bottomLeft;
+    Servo claw;
+    DcMotor Liftright;
+    DcMotor Liftleft;
+
 
     BNO055IMU imu;
     Orientation angles = new Orientation();
     Orientation lastAngles = new Orientation();
     double globalAngle, power = .30, correction;
+    float LiftPower = 0.3f;
 
     // define variable for color sensor
     ColorSensor color;
@@ -56,7 +62,11 @@ public class Auto extends LinearOpMode {
     // from feet to ticks of motor encoder
     double feetToTicks = (19.2*28.0*304.8) / (Math.PI*96.0);
 
+    double distanceToJunction = 0.5;            //feet
+
     int NUM_SAMPLES = 5;
+    double Smallliftlevel = 1.0;
+    double Groundliftlevel =0.0;
 
     // target position as measured on playing field
     // T=position from starting point to where we need to strafe for parking 1/3 (in feet)
@@ -65,6 +75,42 @@ public class Auto extends LinearOpMode {
     double S=25.0/12.0;
     // P=position from starting point to parking position for 1/2/3 (in feet)
     double P=38.0/12.0;
+    //R=position where the robot can rotate at the beginning of the match to score.
+
+    public void ClawOpen(){
+        claw.setPosition(0);
+    }
+
+    public void ClawClose(){
+        claw.setPosition(1);
+    }
+
+    public void Lift(double liftlevel, float speed){
+
+        int tickTarget = (int)(liftlevel * feetToTicks);
+        Liftleft.setTargetPosition(tickTarget);
+        Liftright.setTargetPosition(tickTarget);
+
+        // tell motors to run to target position
+        Liftleft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Liftright.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // set speed based on lift power
+        Liftright.setPower(speed);
+        Liftleft.setPower(speed);
+
+        // wait in this loop as long as at least 1 motor is still moving
+        // motors report busy until they reach the target position
+        while (opModeIsActive() && (Liftleft.isBusy() || Liftright.isBusy() )) {
+            telemetry.addData("lift left", Liftleft.getCurrentPosition()*(1.0/feetToTicks));
+            telemetry.addData("lift right", Liftright.getCurrentPosition()*(1.0/feetToTicks));
+            telemetry.update();
+        }
+        Liftright.setPower(0);
+        Liftleft.setPower(0);
+
+    }
+
 
 
     ElapsedTime runtime = new ElapsedTime();
@@ -160,7 +206,10 @@ public class Auto extends LinearOpMode {
         bottomRight = hardwareMap.dcMotor.get("BR");//control hub port 1
         topLeft = hardwareMap.dcMotor.get("TL"); //control hub port 2
         bottomLeft = hardwareMap.dcMotor.get("BL"); //control hub port 3
+        claw = hardwareMap.servo.get("claw"); //servo port 0
         color = hardwareMap.get(ColorSensor.class, "Color");
+        Liftleft = hardwareMap.dcMotor.get("Liftleft"); // port1
+        Liftright = hardwareMap.dcMotor.get("Liftright"); //port0
 
         // Set direction of all motors so that when we command
         // the direction "forward", the values of speed are positive
@@ -210,81 +259,121 @@ public class Auto extends LinearOpMode {
         if (opModeIsActive()) {
 
             /* WE ARE AT STARTING POSITION */
+            //Step 1= close claw
+            //Step 2= rotate counter clockwise -135 deg
+            //Step 3 = score
+                //Step 3a= drive to junction
+                //Step 3b= lift up to small position
+                //Step 3c= open claw
+                //Step 3d = backup
+                //Step 3e= close claw
+                //Step 3f= lower lift
+            //Step 4= rotate -135 so the back of the robot faces the signal cone.
+            //Step 5= Basic Auto
 
-            rotate(90, 0.5);
 
-            // Drive forward at speed 0.1 while alpha is < 200
-            double speed = 0.1;
-            while (alphaAverage() < 200) {
-                bottomRight.setPower(speed);
-                topRight.setPower(speed);
-                bottomLeft.setPower(speed);
-                topLeft.setPower(speed);
-            }
+            //Step 1
+            ClawClose();
 
-            // Once alpha >= 200, stop robot
-            stopMotors();
+            //Step 2
+            rotate(-135, 0.5);
 
-            /* WE ARE AT "c", READ CONE */
+            //Step3a
+            drive("forward", 0.1f, distanceToJunction);
 
-            // read cone color
-            double red = redAverage();
-            double green = greenAverage();
-            double blue = blueAverage();
+            //Step3b
+            Lift(Smallliftlevel, LiftPower);
 
-            // determine the max color value out of r,g,b
-            double colorMax = Math.max(Math.max(red,green),blue);
+            //Step3c
+            ClawOpen();
 
-            // divide each color by max value to normalize
-            double redNorm = red / colorMax;
-            double greenNorm = green / colorMax;
-            double blueNorm = blue / colorMax;
+            //Step3d
+            drive("backward", 0.1f, distanceToJunction);
 
-            // calculate c which represents the distance from starting point
-            // to where we detected the cone
-            double c=topLeft.getCurrentPosition()*(1.0/feetToTicks);
+            //Step3e
+            ClawClose();
 
-            // check which parking zone the cone represents
-            if (isParking1(redNorm, greenNorm, blueNorm)){
-                telemetry.addLine("Parking 1");
-                telemetry.update();
+            //Step3f
+            Lift(Groundliftlevel,LiftPower);
 
-                // drive forward at 0.2 speed to position T (relative)
-                drive("forward",0.2f,T-c);
+            //Step4
+            rotate(-135, 0.5);
 
-                //At position T turn cw 135 deg
-                rotate(135, 0.8);
-
-                // drive left at 0.4 speed to position S (relative)
-                drive("left",0.4f,S);
-
-                // drive forward at 0.2 speed to position P (relative)
-                drive("forward",0.2f,P-T);
-            }
-            else if (isParking3(redNorm, greenNorm, blueNorm)){
-                telemetry.addLine("Parking 3");
-                telemetry.update();
-
-                // drive forward at 0.2 speed to position T (relative)
-                drive("forward",0.2f,T-c);
-
-                // drive right at 0.4 speed to position S (relative)
-                drive("right",0.4f,S);
-
-                // drive forward at 0.2 speed to position P (relative)
-                drive("forward",0.2f,P-T);
-            }
-            else {
-                telemetry.addLine("Parking 2");
-                telemetry.update();
-
-                // drive forward at 0.2 speed to position P (relative)
-                drive("forward",0.2f,P-c);
-            }
-
-            /* WE ARE AT PARKING POSITION */
-            telemetry.addLine("WE DID IT!");
-            telemetry.update();
+//
+//            rotate(90, 0.5);
+//
+//            // Drive forward at speed 0.1 while alpha is < 200
+//            double speed = 0.1;
+//            while (alphaAverage() < 200) {
+//                bottomRight.setPower(speed);
+//                topRight.setPower(speed);
+//                bottomLeft.setPower(speed);
+//                topLeft.setPower(speed);
+//            }
+//
+//            // Once alpha >= 200, stop robot
+//            stopMotors();
+//
+//            /* WE ARE AT "c", READ CONE */
+//
+//            // read cone color
+//            double red = redAverage();
+//            double green = greenAverage();
+//            double blue = blueAverage();
+//
+//            // determine the max color value out of r,g,b
+//            double colorMax = Math.max(Math.max(red,green),blue);
+//
+//            // divide each color by max value to normalize
+//            double redNorm = red / colorMax;
+//            double greenNorm = green / colorMax;
+//            double blueNorm = blue / colorMax;
+//
+//            // calculate c which represents the distance from starting point
+//            // to where we detected the cone
+//            double c=topLeft.getCurrentPosition()*(1.0/feetToTicks);
+//
+//            // check which parking zone the cone represents
+//            if (isParking1(redNorm, greenNorm, blueNorm)){
+//                telemetry.addLine("Parking 1");
+//                telemetry.update();
+//
+//                // drive forward at 0.2 speed to position T (relative)
+//                drive("forward",0.2f,T-c);
+//
+//                //At position T turn cw 135 deg
+//                rotate(135, 0.8);
+//
+//                // drive left at 0.4 speed to position S (relative)
+//                drive("left",0.4f,S);
+//
+//                // drive forward at 0.2 speed to position P (relative)
+//                drive("forward",0.2f,P-T);
+//            }
+//            else if (isParking3(redNorm, greenNorm, blueNorm)){
+//                telemetry.addLine("Parking 3");
+//                telemetry.update();
+//
+//                // drive forward at 0.2 speed to position T (relative)
+//                drive("forward",0.2f,T-c);
+//
+//                // drive right at 0.4 speed to position S (relative)
+//                drive("right",0.4f,S);
+//
+//                // drive forward at 0.2 speed to position P (relative)
+//                drive("forward",0.2f,P-T);
+//            }
+//            else {
+//                telemetry.addLine("Parking 2");
+//                telemetry.update();
+//
+//                // drive forward at 0.2 speed to position P (relative)
+//                drive("forward",0.2f,P-c);
+//            }
+//
+//            /* WE ARE AT PARKING POSITION */
+//            telemetry.addLine("WE DID IT!");
+//            telemetry.update();
         }
     }
 
