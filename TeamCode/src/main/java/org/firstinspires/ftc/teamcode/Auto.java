@@ -62,7 +62,8 @@ public class Auto extends LinearOpMode {
     // from feet to ticks of motor encoder
     double feetToTicks = (19.2*28.0*304.8) / (Math.PI*96.0);
 
-    double distanceToJunction = 0.5;            //feet
+    double distanceToJunction = 0.1;            //feet
+    double distanceToRotate = 0.7;
 
     int NUM_SAMPLES = 5;
     double Smallliftlevel = 1.0;
@@ -159,6 +160,7 @@ public class Auto extends LinearOpMode {
         {   // turn right.
             leftPower = power;
             rightPower = -power;
+
         }
         else if (degrees > 0)
         {   // turn left.
@@ -275,11 +277,22 @@ public class Auto extends LinearOpMode {
             //Step 1
             ClawClose();
 
+            //Test before rotating so the robot doesn't hit the wall.
+            drive("right", 0.6f, distanceToRotate);
+
             //Step 2
-            rotate(-135, 0.5);
+            topLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            bottomLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            bottomRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            rotate(130, 0.8);
+            topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             //Step3a
-            drive("forward", 0.1f, distanceToJunction);
+            drive("backward", 0.3f, distanceToJunction);
 
             //Step3b
             Lift(Smallliftlevel, LiftPower);
@@ -288,7 +301,7 @@ public class Auto extends LinearOpMode {
             ClawOpen();
 
             //Step3d
-            drive("backward", 0.1f, distanceToJunction);
+            drive("forward", 0.1f, distanceToJunction);
 
             //Step3e
             ClawClose();
@@ -297,7 +310,16 @@ public class Auto extends LinearOpMode {
             Lift(Groundliftlevel,LiftPower);
 
             //Step4
-            rotate(-135, 0.5);
+            topLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            bottomLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            bottomRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            rotate(135, 0.5);
+            topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
 //
 //            rotate(90, 0.5);
