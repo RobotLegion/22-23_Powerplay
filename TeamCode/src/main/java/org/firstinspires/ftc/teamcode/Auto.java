@@ -86,6 +86,7 @@ public class Auto extends LinearOpMode {
         claw.setPosition(1);
     }
 
+    //liftlevel in feet. Speed in 0-1
     public void Lift(double liftlevel, float speed){
 
         int tickTarget = (int)(liftlevel * feetToTicks);
@@ -202,6 +203,20 @@ public class Auto extends LinearOpMode {
         resetAngle();
     }
 
+    public void withoutEncoder() {
+        topLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bottomLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bottomRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public void withEncoder(){
+        topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
     public void runOpMode() {
         // Hardware Maps
         topRight = hardwareMap.dcMotor.get("TR");//control hub port 0
@@ -281,15 +296,10 @@ public class Auto extends LinearOpMode {
             drive("right", 0.6f, distanceToRotate);
 
             //Step 2
-            topLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            bottomLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            bottomRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+           withoutEncoder();
             rotate(130, 0.8);
-            topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            withEncoder();
+
 
             //Step3a
             drive("backward", 0.3f, distanceToJunction);
@@ -310,16 +320,9 @@ public class Auto extends LinearOpMode {
             Lift(Groundliftlevel,LiftPower);
 
             //Step4
-            topLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            bottomLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            bottomRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            withoutEncoder();
             rotate(135, 0.5);
-            topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
+           withEncoder();
 
 //
 //            rotate(90, 0.5);

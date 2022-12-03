@@ -177,7 +177,7 @@ public class Teleop extends LinearOpMode {
         bottomRight = hardwareMap.dcMotor.get("BR"); //control hub port 1
         topLeft = hardwareMap.dcMotor.get("TL"); //control hub port 2
         bottomLeft = hardwareMap.dcMotor.get("BL"); //control hub port 3
-        claw = hardwareMap.servo.get("claw"); //servo port 0
+        claw = hardwareMap.servo.get("claw"); // control hub servo port 0
         Liftleft = hardwareMap.dcMotor.get("Liftleft"); // port1
         Liftright = hardwareMap.dcMotor.get("Liftright"); //port0
         color = hardwareMap.get(ColorSensor.class, "Color");
