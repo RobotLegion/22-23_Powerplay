@@ -162,7 +162,7 @@ public class Teleop extends LinearOpMode {
     }
 
     public void ClawOpen(){
-        claw.setPosition(0);
+        claw.setPosition(0.2);
     }
 
     public void ClawClose(){
@@ -180,6 +180,7 @@ public class Teleop extends LinearOpMode {
         claw = hardwareMap.servo.get("claw"); // control hub servo port 0
         Liftleft = hardwareMap.dcMotor.get("Liftleft"); // port1
         Liftright = hardwareMap.dcMotor.get("Liftright"); //port0
+
         color = hardwareMap.get(ColorSensor.class, "Color");
         topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         claw.scaleRange(0, 0.55);
@@ -281,15 +282,23 @@ public class Teleop extends LinearOpMode {
             double BottomLeftSpeed = -gamepad1LeftY - gamepad1LeftX + gamepad1RightX; //Combines the inputs of the sticks to clip their output to a value between 1 and -1
 
             // sets speed
+            //I changed 3 to 2 in an attempt to make the robot drive slower
             double topLeftCorrectedSpeed = Range.clip(Math.pow(TopRightSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
             double topRightCorrectedSpeed = Range.clip(Math.pow(TopLeftSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
             double bottomLeftCorrectedSpeed = Range.clip(Math.pow(BottomRightSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
             double bottomRightCorrectedSpeed = Range.clip(Math.pow(BottomLeftSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
 
+            if (myGamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
+                speedfactor = 0.8;
+            } else {
+                speedfactor = 0.5;
+            }
             topRight.setPower(topRightCorrectedSpeed*speedfactor);
             bottomRight.setPower(bottomRightCorrectedSpeed*speedfactor);
             topLeft.setPower(topLeftCorrectedSpeed*speedfactor);
             bottomLeft.setPower(bottomLeftCorrectedSpeed*speedfactor);
+
+
             Liftleft.setPower(LiftPower);
             Liftright.setPower(LiftPower);
 

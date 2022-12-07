@@ -17,6 +17,8 @@ public class Motor extends LinearOpMode {
     double feetToTicks = (19.2*28.0*304.8) / (Math.PI*96.0);
     double ticksToFeet = 1.0/feetToTicks;
 
+    boolean liftIsMoving = false;
+
     DcMotor LiftMotor;
     
     @Override
@@ -75,6 +77,16 @@ public class Motor extends LinearOpMode {
                     }
                     Lift(liftLevels[Currentliftlevel], 0.5f);
                 }
+
+                //TODO: Use liftIsMoving variable
+                if (LiftMotor.isBusy()) {
+                    telemetry.addData("lift", LiftMotor.getCurrentPosition()*(1.0/feetToTicks));
+
+                    telemetry.update();
+                } else {
+                    LiftMotor.setPower(0);
+                }
+
 //    
 //                if (myGamepad2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
 //                    Highlift();
@@ -136,15 +148,8 @@ public class Motor extends LinearOpMode {
 
         LiftMotor.setPower(speed);
 
-        // wait in this loop as long as at least 1 motor is still moving
-        // motors report busy until they reach the target position
-        while (opModeIsActive() && (LiftMotor.isBusy())) {
-            telemetry.addData("lift", LiftMotor.getCurrentPosition()*(1.0/feetToTicks));
+        liftIsMoving = true;
 
-            telemetry.update();
-        }
-
-        LiftMotor.setPower(0);
 
     }
 }
