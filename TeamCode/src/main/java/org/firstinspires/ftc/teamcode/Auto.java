@@ -34,9 +34,7 @@ public class Auto extends LinearOpMode {
     //R=position where the robot can rotate at the beginning of the match to score.
 
     // lift
-    double smallLiftlevel   = 1.0;          // feet
-    double groundLiftlevel  = 0.0;          // feet
-    float liftPower        = 0.3f;         // 0-1
+    float liftPower                     = 0.5f;         // 0-1
 
 
     // instantiate a robot class
@@ -113,7 +111,7 @@ public class Auto extends LinearOpMode {
             driveToPosition("backward", 0.3f, distanceToJunction);
 
             //Step3b
-            moveLift(smallLiftlevel, liftPower);
+            moveLiftBlocking(robot.smallLiftlevel, liftPower);
 
             //Step3c
             robot.clawOpen();
@@ -125,7 +123,7 @@ public class Auto extends LinearOpMode {
             robot.clawClose();
 
             //Step3f
-            moveLift(groundLiftlevel, liftPower);
+            moveLiftBlocking(robot.groundLiftlevel, liftPower);
 
             //Step4
             robot.driveWithoutEncoder();
@@ -278,7 +276,7 @@ public class Auto extends LinearOpMode {
 
     // LIFT FUNCTIONS
     // move lift to liftLevel (double) at speed
-    public void moveLift(double liftlevel, float speed){
+    public void moveLiftBlocking(double liftlevel, float speed){
 
         int tickTarget = (int)(liftlevel * robot.feetToTicks);
         robot.liftMotor.setTargetPosition(tickTarget);

@@ -13,9 +13,17 @@ public class Robot {
 
     // CONFIGURATION
     double      clawOpenPosition    = 0.2;
-    double      clawClosePosition   = 1.0;
+    double      clawClosePosition   = 0.55;
     double      feetToTicks         = (19.2*28.0*304.8) / (Math.PI*96.0);
+    double      ticksToFeet         = 1.0/feetToTicks;
     int         colorSensorSamples  = 5;
+    
+    int         coneLiftlevel       = 0.06; // feet
+    int         terminalLiftlevel   = 0.14; // feet
+    int         smallLiftlevel      = 0.86; // feet
+    int         mediumLiftlevel     = 1.34; // feet
+    int         currentLiftlevel    = 0;    // index
+    double[]    liftLevels          = {coneLiftlevel, terminalLiftlevel, smallLiftlevel, mediumLiftlevel};
 
     // DRIVETRAIN
     DcMotor     topRight;
@@ -47,7 +55,8 @@ public class Robot {
         
         // initalize claw
         clawServo       = hardwareMap.servo.get("claw");                        // expansion hub port 0
-        
+        clawServo.scaleRange(clawOpenPosition, clawClosePosition);
+
         // initalize lift
         liftMotor       = hardwareMap.dcMotor.get("liftMotor");                 // expansion hub port 0
 
@@ -108,12 +117,12 @@ public class Robot {
 
 
     // CLAW FUNCTIONS
-    public void clawOpen(){
-        clawServo.setPosition(clawOpenPosition);
+    public void clawOpen() {
+        clawServo.setPosition(0.0);
     }
 
-    public void clawClose(){
-        clawServo.setPosition(clawClosePosition);
+    public void clawClose() {
+        clawServo.setPosition(1.0);
     }
 
     // COLOR SENSOR FUNCTIONS
