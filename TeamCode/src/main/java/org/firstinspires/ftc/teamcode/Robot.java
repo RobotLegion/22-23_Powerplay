@@ -126,7 +126,7 @@ public class Robot {
         // run for colorSensorSamples iterations
         for (int i = 0; i < colorSensorSamples; i++) {
             // increment redSum by our new red color sensor reading
-            redSum += robot.colorSensor.red();
+            redSum += colorSensor.red();
         }
 
         // return the average red value (redSum divided by the number of samples we take)
@@ -142,7 +142,7 @@ public class Robot {
         // run for colorSensorSamples iterations
         for (int i = 0; i < 5; i++) {
             // increment blueSum by our new blue color sensor reading
-            blueSum += robot.colorSensor.blue();
+            blueSum += colorSensor.blue();
         }
 
         // return the average blue value (blueSum divided by the number of samples we take)
@@ -158,7 +158,7 @@ public class Robot {
         // run for colorSensorSamples iterations
         for (int i = 0; i < 5; i++) {
             // increment greenSum by our new green color sensor reading
-            greenSum += robot.colorSensor.green();
+            greenSum += colorSensor.green();
         }
 
         // return the average green value (greenSum divided by the number of samples we take)
@@ -174,10 +174,10 @@ public class Robot {
         // run for NUM_SAMPLES iterations
         for (int i = 0; i < colorSensorSamples; i++) {
             // increment alphaSum by our new alpha color sensor reading
-            alphaSum += robot.colorSensor.alpha();
+            alphaSum += colorSensor.alpha();
         }
 
         // return the average alpha value (alphaSum divided by the number of samples we take)
-        return (double)alphaSum / (double)NUM_SAMPLES;
+        return (double)alphaSum / (double)colorSensorSamples;
     }
 }
