@@ -54,10 +54,6 @@ public class Auto extends LinearOpMode {
     // define variable for color sensor
     // ColorSensor color;
 
-    // conversion factor for GoBila 19.2:1 gear motors
-    // from feet to ticks of motor encoder
-    double feetToTicks = (19.2*28.0*304.8) / (Math.PI*96.0);
-
     double distanceToJunction = 0.1;            //feet
     double distanceToRotate = 0.7;
 
@@ -77,7 +73,7 @@ public class Auto extends LinearOpMode {
     //liftlevel in feet. Speed in 0-1
     public void Lift(double liftlevel, float speed){
 
-        int tickTarget = (int)(liftlevel * feetToTicks);
+        int tickTarget = (int)(liftlevel * robot.feetToTicks);
         robot.liftMotor.setTargetPosition(tickTarget);
 
         // tell motors to run to target position
@@ -89,7 +85,7 @@ public class Auto extends LinearOpMode {
         // wait in this loop as long as at least 1 motor is still moving
         // motors report busy until they reach the target position
         while (opModeIsActive() && (robot.liftMotor.isBusy())) {
-            telemetry.addData("lift motor", robot.liftMotor.getCurrentPosition()*(1.0/feetToTicks));
+            telemetry.addData("lift motor", robot.liftMotor.getCurrentPosition()*(1.0/robot.feetToTicks));
             telemetry.update();
         }
         robot.liftMotor.setPower(0);
@@ -102,7 +98,7 @@ public class Auto extends LinearOpMode {
 
     public void resetAngle()
     {
-        lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        lastAngles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
         globalAngle = 0;
     }
@@ -114,7 +110,7 @@ public class Auto extends LinearOpMode {
         // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
         // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
 
-        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        Orientation angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
         double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
 
@@ -236,7 +232,7 @@ public class Auto extends LinearOpMode {
         }
 
         telemetry.addData("Mode", "waiting for start");
-        telemetry.addData("imu calib status", imu.getCalibrationStatus().toString());
+        telemetry.addData("imu calib status", robot.imu.getCalibrationStatus().toString());
         telemetry.update();
 
         // Wait for start button press on Driver Station
@@ -327,7 +323,7 @@ public class Auto extends LinearOpMode {
 //
 //            // calculate c which represents the distance from starting point
 //            // to where we detected the cone
-//            double c=topLeft.getCurrentPosition()*(1.0/feetToTicks);
+//            double c=topLeft.getCurrentPosition()*(1.0/robot.feetToTicks);
 //
 //            // check which parking zone the cone represents
 //            if (isParking1(redNorm, greenNorm, blueNorm)){
@@ -416,7 +412,7 @@ public class Auto extends LinearOpMode {
         robot.bottomRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // convert our target (in feet) to ticks that the motor can understand
-        int tickTarget = (int)(target * feetToTicks);
+        int tickTarget = (int)(target * robot.feetToTicks);
 
         // set motor target positions based on direction
         if (direction == "forward"){
@@ -465,11 +461,11 @@ public class Auto extends LinearOpMode {
 
         // wait in this loop as long as at least 1 motor is still moving
         // motors report busy until they reach the target position
-        while (opModeIsActive() && (bottomRight.isBusy() || topRight.isBusy() || bottomLeft.isBusy() || topLeft.isBusy() )) {
-            telemetry.addData("top left", topLeft.getCurrentPosition()*(1.0/feetToTicks));
-            telemetry.addData("top right", topRight.getCurrentPosition()*(1.0/feetToTicks));
-            telemetry.addData("bottom left", bottomLeft.getCurrentPosition()*(1.0/feetToTicks));
-            telemetry.addData("bottom right", bottomRight.getCurrentPosition()*(1.0/feetToTicks));
+        while (opModeIsActive() && (robot.bottomRight.isBusy() || robot.topRight.isBusy() || robot.bottomLeft.isBusy() || robot.topLeft.isBusy() )) {
+            telemetry.addData("top left", robot.topLeft.getCurrentPosition()*(1.0/robot.feetToTicks));
+            telemetry.addData("top right", robot.topRight.getCurrentPosition()*(1.0/robot.feetToTicks));
+            telemetry.addData("bottom left", robot.bottomLeft.getCurrentPosition()*(1.0/robot.feetToTicks));
+            telemetry.addData("bottom right", robot.bottomRight.getCurrentPosition()*(1.0/robot.feetToTicks));
             telemetry.update();
         }
 
@@ -491,7 +487,7 @@ public class Auto extends LinearOpMode {
         // run for NUM_SAMPLES iterations
         for (int i = 0; i < NUM_SAMPLES; i++) {
             // increment alphaSum by our new alpha color sensor reading
-            alphaSum += color.alpha();
+            alphaSum += robot.colorSensorBack.alpha();
         }
 
         // return the average alpha value (alphaSum divided by the number of samples we take)
@@ -507,7 +503,7 @@ public class Auto extends LinearOpMode {
         // run for NUM_SAMPLES iterations
         for (int i = 0; i < NUM_SAMPLES; i++) {
             // increment redSum by our new red color sensor reading
-            redSum += color.red();
+            redSum += robot.colorSensorBack.red();
         }
 
         // return the average red value (redSum divided by the number of samples we take)
@@ -523,7 +519,7 @@ public class Auto extends LinearOpMode {
         // run for NUM_SAMPLES iterations
         for (int i = 0; i < 5; i++) {
             // increment blueSum by our new blue color sensor reading
-            blueSum += color.blue();
+            blueSum += robot.colorSensorBack.blue();
         }
 
         // return the average blue value (blueSum divided by the number of samples we take)
@@ -539,7 +535,7 @@ public class Auto extends LinearOpMode {
         // run for NUM_SAMPLES iterations
         for (int i = 0; i < 5; i++) {
             // increment greenSum by our new green color sensor reading
-            greenSum += color.green();
+            greenSum += robot.colorSensorBack.green();
         }
 
         // return the average green value (greenSum divided by the number of samples we take)

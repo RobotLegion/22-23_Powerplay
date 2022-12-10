@@ -14,13 +14,13 @@ public class Robot {
     // CONFIGURATION
     double      clawOpenPosition    = 0.2;
     double      clawClosePosition   = 1.0;
+    double      feetToTicks = (19.2*28.0*304.8) / (Math.PI*96.0);
 
     // DRIVETRAIN
     DcMotor     topRight;
     DcMotor     bottomRight;
     DcMotor     topLeft;
     DcMotor     bottomLeft;
-    double      feetToTicks = (19.2*28.0*304.8) / (Math.PI*96.0);
 
     // CLAW
     Servo       clawServo;
