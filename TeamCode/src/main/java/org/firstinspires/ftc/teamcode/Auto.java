@@ -45,8 +45,7 @@ public class Auto extends LinearOpMode {
     DcMotor topLeft;
     DcMotor bottomLeft;
     Servo claw;
-    DcMotor Liftright;
-    DcMotor Liftleft;
+    DcMotor LiftMotor;
 
 
     BNO055IMU imu;
@@ -90,26 +89,21 @@ public class Auto extends LinearOpMode {
     public void Lift(double liftlevel, float speed){
 
         int tickTarget = (int)(liftlevel * feetToTicks);
-        Liftleft.setTargetPosition(tickTarget);
-        Liftright.setTargetPosition(tickTarget);
+        LiftMotor.setTargetPosition(tickTarget);
 
         // tell motors to run to target position
-        Liftleft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Liftright.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // set speed based on lift power
-        Liftright.setPower(speed);
-        Liftleft.setPower(speed);
+        LiftMotor.setPower(speed);
 
         // wait in this loop as long as at least 1 motor is still moving
         // motors report busy until they reach the target position
-        while (opModeIsActive() && (Liftleft.isBusy() || Liftright.isBusy() )) {
-            telemetry.addData("lift left", Liftleft.getCurrentPosition()*(1.0/feetToTicks));
-            telemetry.addData("lift right", Liftright.getCurrentPosition()*(1.0/feetToTicks));
+        while (opModeIsActive() && (LiftMotor.isBusy())) {
+            telemetry.addData("lift motor", LiftMotor.getCurrentPosition()*(1.0/feetToTicks));
             telemetry.update();
         }
-        Liftright.setPower(0);
-        Liftleft.setPower(0);
+        LiftMotor.setPower(0);
 
     }
 
@@ -225,8 +219,7 @@ public class Auto extends LinearOpMode {
         bottomLeft = hardwareMap.dcMotor.get("BL"); //control hub port 3
         claw = hardwareMap.servo.get("claw"); //servo port 0
         color = hardwareMap.get(ColorSensor.class, "Color");
-        Liftleft = hardwareMap.dcMotor.get("Liftleft"); // port1
-        Liftright = hardwareMap.dcMotor.get("Liftright"); //port0
+        LiftMotor = hardwareMap.dcMotor.get("Liftmotor"); // port1
 
         // Set direction of all motors so that when we command
         // the direction "forward", the values of speed are positive
@@ -328,7 +321,7 @@ public class Auto extends LinearOpMode {
 //            rotate(90, 0.5);
 //
 //            // Drive forward at speed 0.1 while alpha is < 200
-//            double speed = 0.1;
+//            double speed = 0.3;
 //            while (alphaAverage() < 200) {
 //                bottomRight.setPower(speed);
 //                topRight.setPower(speed);
@@ -364,7 +357,7 @@ public class Auto extends LinearOpMode {
 //                telemetry.update();
 //
 //                // drive forward at 0.2 speed to position T (relative)
-//                drive("forward",0.2f,T-c);
+//                drive("forward",0.4f,T-c);
 //
 //                //At position T turn cw 135 deg
 //                rotate(135, 0.8);
@@ -373,27 +366,27 @@ public class Auto extends LinearOpMode {
 //                drive("left",0.4f,S);
 //
 //                // drive forward at 0.2 speed to position P (relative)
-//                drive("forward",0.2f,P-T);
+//                drive("forward",0.3f,P-T);
 //            }
 //            else if (isParking3(redNorm, greenNorm, blueNorm)){
 //                telemetry.addLine("Parking 3");
 //                telemetry.update();
 //
 //                // drive forward at 0.2 speed to position T (relative)
-//                drive("forward",0.2f,T-c);
+//                drive("forward",0.4f,T-c);
 //
 //                // drive right at 0.4 speed to position S (relative)
 //                drive("right",0.4f,S);
 //
 //                // drive forward at 0.2 speed to position P (relative)
-//                drive("forward",0.2f,P-T);
+//                drive("forward",0.4f,P-T);
 //            }
 //            else {
 //                telemetry.addLine("Parking 2");
 //                telemetry.update();
 //
 //                // drive forward at 0.2 speed to position P (relative)
-//                drive("forward",0.2f,P-c);
+//                drive("forward",0.4f,P-c);
 //            }
 //
 //            /* WE ARE AT PARKING POSITION */
