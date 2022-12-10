@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import org.firstinspires.ftc.teamcode.Robot;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -19,7 +21,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
 public class Auto extends LinearOpMode {
-    //Internet Password: Robotics 0145
+
+    Robot robot = Robot();
+    robot.init();
+
+
     //Blue: 00,00,255 Parking 1
     //Magenta: 255 00 255 Parking 2
     //yellow: 255 255 00 Parking 3
@@ -40,22 +46,22 @@ public class Auto extends LinearOpMode {
     //Behind = -180
 
     // define variables for motors
-    DcMotor topRight;
-    DcMotor bottomRight;
-    DcMotor topLeft;
-    DcMotor bottomLeft;
-    Servo claw;
-    DcMotor LiftMotor;
+    // DcMotor topRight;
+    // DcMotor bottomRight;
+    // DcMotor topLeft;
+    // DcMotor bottomLeft;
+    // Servo claw;
+    // DcMotor LiftMotor;
 
 
-    BNO055IMU imu;
+    // BNO055IMU imu;
     Orientation angles = new Orientation();
     Orientation lastAngles = new Orientation();
     double globalAngle, power = .30, correction;
     float LiftPower = 0.3f;
 
     // define variable for color sensor
-    ColorSensor color;
+    // ColorSensor color;
 
     // conversion factor for GoBila 19.2:1 gear motors
     // from feet to ticks of motor encoder
@@ -213,13 +219,13 @@ public class Auto extends LinearOpMode {
 
     public void runOpMode() {
         // Hardware Maps
-        topRight = hardwareMap.dcMotor.get("TR");//control hub port 0
-        bottomRight = hardwareMap.dcMotor.get("BR");//control hub port 1
-        topLeft = hardwareMap.dcMotor.get("TL"); //control hub port 2
-        bottomLeft = hardwareMap.dcMotor.get("BL"); //control hub port 3
-        claw = hardwareMap.servo.get("claw"); //servo port 0
-        color = hardwareMap.get(ColorSensor.class, "Color");
-        LiftMotor = hardwareMap.dcMotor.get("Liftmotor"); // port1
+        // topRight = hardwareMap.dcMotor.get("TR");//control hub port 0
+        // bottomRight = hardwareMap.dcMotor.get("BR");//control hub port 1
+        // topLeft = hardwareMap.dcMotor.get("TL"); //control hub port 2
+        // bottomLeft = hardwareMap.dcMotor.get("BL"); //control hub port 3
+        // claw = hardwareMap.servo.get("claw"); //servo port 0
+        // color = hardwareMap.get(ColorSensor.class, "Color");
+        // LiftMotor = hardwareMap.dcMotor.get("Liftmotor"); // port1
 
         // Set direction of all motors so that when we command
         // the direction "forward", the values of speed are positive
@@ -240,19 +246,19 @@ public class Auto extends LinearOpMode {
         bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode                = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.loggingEnabled      = false;
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
+        // BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        // parameters.mode                = BNO055IMU.SensorMode.IMU;
+        // parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        // parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        // parameters.loggingEnabled      = false;
+        // imu = hardwareMap.get(BNO055IMU.class, "imu");
+        // imu.initialize(parameters);
 
         telemetry.addData("Mode", "calibrating...");
         telemetry.update();
 
         // make sure the imu gyro is calibrated before continuing.
-        while (!isStopRequested() && !imu.isGyroCalibrated()) {
+        while (!isStopRequested() && !robot.imu.isGyroCalibrated()) {
             sleep(50);
             idle();
         }
