@@ -44,14 +44,6 @@ public class Auto extends LinearOpMode {
     //Counter-clockwise = 90
     //Behind = -180
 
-    // define variables for motors
-    // DcMotor topRight;
-    // DcMotor bottomRight;
-    // DcMotor topLeft;
-    // DcMotor bottomLeft;
-    // Servo claw;
-    // DcMotor LiftMotor;
-
 
     // BNO055IMU imu;
     Orientation angles = new Orientation();
@@ -86,21 +78,21 @@ public class Auto extends LinearOpMode {
     public void Lift(double liftlevel, float speed){
 
         int tickTarget = (int)(liftlevel * feetToTicks);
-        LiftMotor.setTargetPosition(tickTarget);
+        robot.liftMotor.setTargetPosition(tickTarget);
 
         // tell motors to run to target position
-        LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // set speed based on lift power
-        LiftMotor.setPower(speed);
+        robot.liftMotor.setPower(speed);
 
         // wait in this loop as long as at least 1 motor is still moving
         // motors report busy until they reach the target position
-        while (opModeIsActive() && (LiftMotor.isBusy())) {
-            telemetry.addData("lift motor", LiftMotor.getCurrentPosition()*(1.0/feetToTicks));
+        while (opModeIsActive() && (robot.liftMotor.isBusy())) {
+            telemetry.addData("lift motor", robot.liftMotor.getCurrentPosition()*(1.0/feetToTicks));
             telemetry.update();
         }
-        LiftMotor.setPower(0);
+        robot.liftMotor.setPower(0);
 
     }
 
@@ -162,10 +154,10 @@ public class Auto extends LinearOpMode {
         else return;
 
         // set power to rotate.
-        topRight.setPower(leftPower);
-        bottomLeft.setPower(rightPower);
-        topLeft.setPower(leftPower);
-        bottomRight.setPower(rightPower);
+        robot.topRight.setPower(leftPower);
+        robot.bottomLeft.setPower(rightPower);
+        robot.topLeft.setPower(leftPower);
+        robot.bottomRight.setPower(rightPower);
 
 
 
@@ -182,10 +174,10 @@ public class Auto extends LinearOpMode {
             while (opModeIsActive() && getAngle() < degrees) {}
 
         // turn the motors off.
-        topRight.setPower(0);
-        bottomLeft.setPower(0);
-        topLeft.setPower(0);
-        bottomRight.setPower(0);
+        robot.topRight.setPower(0);
+        robot.bottomLeft.setPower(0);
+        robot.topLeft.setPower(0);
+        robot.bottomRight.setPower(0);
 
         // wait for rotation to stop.
         //sleep(1000);
@@ -195,17 +187,17 @@ public class Auto extends LinearOpMode {
     }
 
     public void withoutEncoder() {
-        topLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bottomLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bottomRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.topLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.bottomLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.bottomRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public void withEncoder(){
-        topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void runOpMode() {
