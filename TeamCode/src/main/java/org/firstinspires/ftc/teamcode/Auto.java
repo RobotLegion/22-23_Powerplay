@@ -23,7 +23,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 public class Auto extends LinearOpMode {
 
     Robot robot = Robot();
-    robot.init();
 
 
     //Blue: 00,00,255 Parking 1
@@ -82,14 +81,6 @@ public class Auto extends LinearOpMode {
     // P=position from starting point to parking position for 1/2/3 (in feet)
     double P=38.0/12.0;
     //R=position where the robot can rotate at the beginning of the match to score.
-
-    public void ClawOpen(){
-        claw.setPosition(0);
-    }
-
-    public void ClawClose(){
-        claw.setPosition(1);
-    }
 
     //liftlevel in feet. Speed in 0-1
     public void Lift(double liftlevel, float speed){
@@ -218,41 +209,30 @@ public class Auto extends LinearOpMode {
     }
 
     public void runOpMode() {
-        // Hardware Maps
-        // topRight = hardwareMap.dcMotor.get("TR");//control hub port 0
-        // bottomRight = hardwareMap.dcMotor.get("BR");//control hub port 1
-        // topLeft = hardwareMap.dcMotor.get("TL"); //control hub port 2
-        // bottomLeft = hardwareMap.dcMotor.get("BL"); //control hub port 3
-        // claw = hardwareMap.servo.get("claw"); //servo port 0
-        // color = hardwareMap.get(ColorSensor.class, "Color");
-        // LiftMotor = hardwareMap.dcMotor.get("Liftmotor"); // port1
+
+        // INITALIZE ROBOT
+        robot.init(hardwareMap);
+
+
 
         // Set direction of all motors so that when we command
         // the direction "forward", the values of speed are positive
-        topLeft.setDirection(DcMotor.Direction.FORWARD);
-        topRight.setDirection(DcMotor.Direction.REVERSE);
-        bottomLeft.setDirection(DcMotor.Direction.FORWARD);
-        bottomRight.setDirection(DcMotor.Direction.REVERSE);
+        robot.topLeft.setDirection(DcMotor.Direction.FORWARD);
+        robot.topRight.setDirection(DcMotor.Direction.REVERSE);
+        robot.bottomLeft.setDirection(DcMotor.Direction.FORWARD);
+        robot.bottomRight.setDirection(DcMotor.Direction.REVERSE);
 
         // Stop motor and reset encoders to 0
-        topLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        topRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bottomLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bottomRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.topLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.topRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.bottomLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.bottomRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // Enables motor encoders to track how much the motors have rotated
-        topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        // BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        // parameters.mode                = BNO055IMU.SensorMode.IMU;
-        // parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        // parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        // parameters.loggingEnabled      = false;
-        // imu = hardwareMap.get(BNO055IMU.class, "imu");
-        // imu.initialize(parameters);
+        robot.topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         telemetry.addData("Mode", "calibrating...");
         telemetry.update();
@@ -289,13 +269,13 @@ public class Auto extends LinearOpMode {
 
 
             //Step 1
-            ClawClose();
+            robot.clawClose();
 
             //Test before rotating so the robot doesn't hit the wall.
             drive("right", 0.6f, distanceToRotate);
 
             //Step 2
-           withoutEncoder();
+            withoutEncoder();
             rotate(130, 0.8);
             withEncoder();
 
@@ -307,13 +287,13 @@ public class Auto extends LinearOpMode {
             Lift(Smallliftlevel, LiftPower);
 
             //Step3c
-            ClawOpen();
+            robot.clawOpen();
 
             //Step3d
             drive("forward", 0.1f, distanceToJunction);
 
             //Step3e
-            ClawClose();
+            robot.clawClose();
 
             //Step3f
             Lift(Groundliftlevel,LiftPower);
@@ -403,10 +383,10 @@ public class Auto extends LinearOpMode {
 
     // stop all the motors
     public void stopMotors(){
-        topRight.setPower(0);
-        bottomRight.setPower(0);
-        topLeft.setPower(0);
-        bottomLeft.setPower(0);
+        robot.topRight.setPower(0);
+        robot.bottomRight.setPower(0);
+        robot.topLeft.setPower(0);
+        robot.bottomLeft.setPower(0);
     }
 
 //    public void rotate(double degree, double speed) {
@@ -438,10 +418,10 @@ public class Auto extends LinearOpMode {
     // Target=Feet
     public void drive(String direction, float speed, double target){
         // stop motors and reset encoder to 0
-        topLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        topRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bottomLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bottomRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.topLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.topRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.bottomLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.bottomRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // convert our target (in feet) to ticks that the motor can understand
         int tickTarget = (int)(target * feetToTicks);
@@ -449,47 +429,47 @@ public class Auto extends LinearOpMode {
         // set motor target positions based on direction
         if (direction == "forward"){
             // forward = all positive
-            topLeft.setTargetPosition(tickTarget);
-            topRight.setTargetPosition(tickTarget);
-            bottomLeft.setTargetPosition(tickTarget);
-            bottomRight.setTargetPosition(tickTarget);
+            robot.topLeft.setTargetPosition(tickTarget);
+            robot.topRight.setTargetPosition(tickTarget);
+            robot.bottomLeft.setTargetPosition(tickTarget);
+            robot.bottomRight.setTargetPosition(tickTarget);
         }
         else if(direction == "backward"){
             // backward = all negative
-            topLeft.setTargetPosition(-tickTarget);
-            topRight.setTargetPosition(-tickTarget);
-            bottomLeft.setTargetPosition(-tickTarget);
-            bottomRight.setTargetPosition(-tickTarget);
+            robot.topLeft.setTargetPosition(-tickTarget);
+            robot.topRight.setTargetPosition(-tickTarget);
+            robot.bottomLeft.setTargetPosition(-tickTarget);
+            robot.bottomRight.setTargetPosition(-tickTarget);
         }
         else if(direction == "left"){
             // left = topLeft and bottomRight negative,
             // topRight and bottomLeft positive
-            topLeft.setTargetPosition(-tickTarget);
-            topRight.setTargetPosition(tickTarget);
-            bottomLeft.setTargetPosition(tickTarget);
-            bottomRight.setTargetPosition(-tickTarget);
+            robot.topLeft.setTargetPosition(-tickTarget);
+            robot.topRight.setTargetPosition(tickTarget);
+            robot.bottomLeft.setTargetPosition(tickTarget);
+            robot.bottomRight.setTargetPosition(-tickTarget);
         }
         else if(direction == "right"){
             // right = opposite of left
-            topLeft.setTargetPosition(tickTarget);
-            topRight.setTargetPosition(-tickTarget);
-            bottomLeft.setTargetPosition(-tickTarget);
-            bottomRight.setTargetPosition(tickTarget);
+            robot.topLeft.setTargetPosition(tickTarget);
+            robot.topRight.setTargetPosition(-tickTarget);
+            robot.bottomLeft.setTargetPosition(-tickTarget);
+            robot.bottomRight.setTargetPosition(tickTarget);
         }
 
         // tell motors to run to target position
-        topLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        topRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bottomLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bottomRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.topLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.topRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.bottomLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.bottomRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // set speed based on input
         // NOTE: all positive speeds because direction is specified by signs
         // given to setTargetPosition
-        topRight.setPower(speed);
-        bottomRight.setPower(speed);
-        topLeft.setPower(speed);
-        bottomLeft.setPower(speed);
+        robot.topRight.setPower(speed);
+        robot.bottomRight.setPower(speed);
+        robot.topLeft.setPower(speed);
+        robot.bottomLeft.setPower(speed);
 
         // wait in this loop as long as at least 1 motor is still moving
         // motors report busy until they reach the target position

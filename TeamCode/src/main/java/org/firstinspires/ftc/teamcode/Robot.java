@@ -1,3 +1,5 @@
+package org.firstinspires.ftc.teamcode;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -8,6 +10,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 // import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 public class Robot {
+
+    // CONFIGURATION
+    double      clawOpenPosition    = 0.2;
+    double      clawClosePosition   = 1.0;
 
     // DRIVETRAIN
     DcMotor     topRight;
@@ -27,7 +33,7 @@ public class Robot {
     ColorSensor colorSensorBack;
 
     // initalize the robot hardware
-    public void init() {
+    public void init(HardwareMap hardwareMap) {
 
         // TODO: verify comments are correct ports!
         // TODO: create new robot configuration with new names!
@@ -39,7 +45,7 @@ public class Robot {
         bottomLeft      = hardwareMap.dcMotor.get("bottomLeft");                // control hub port 3
         
         // initalize claw
-        claw            = hardwareMap.servo.get("claw");                        // expansion hub port 0
+        clawServo       = hardwareMap.servo.get("claw");                        // expansion hub port 0
         
         // initalize lift
         liftMotor       = hardwareMap.dcMotor.get("liftMotor");                 // expansion hub port 0
@@ -61,5 +67,13 @@ public class Robot {
         //     sleep(50);
         //     idle();
         // }
+    }
+
+    public void clawOpen(){
+        clawServo.setPosition(clawOpenPosition);
+    }
+
+    public void clawClose(){
+        clawServo.setPosition(clawClosePosition);
     }
 }
