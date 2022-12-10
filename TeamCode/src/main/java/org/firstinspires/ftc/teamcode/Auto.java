@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -22,186 +21,37 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class Auto extends LinearOpMode {
 
-    Robot robot = Robot();
-
-
-    //Blue: 00,00,255 Parking 1
-    //Magenta: 255 00 255 Parking 2
-    //yellow: 255 255 00 Parking 3
-    //Alpha threshold is about 300
-    //Flat colors
-    //Drive towards the signal "How do we know when we are 2cm from the cone?" yes
-    //Read the color
-    //use if statement to decide what to do when each color is read
-
-    //if color=turquoise:
-    //then back strafe left then forwards
-    //else if color=magenta:
-    //drive forwards
-    //else if color=green:
-    //back, strafe right, forward
-    //Clockwise = -90
-    //Counter-clockwise = 90
-    //Behind = -180
-
-
-    // BNO055IMU imu;
-    Orientation angles = new Orientation();
-    Orientation lastAngles = new Orientation();
-    double globalAngle, power = .30, correction;
-    float LiftPower = 0.3f;
-
-    // define variable for color sensor
-    // ColorSensor color;
-
-    double distanceToJunction = 0.1;            //feet
-    double distanceToRotate = 0.7;
-
-    int NUM_SAMPLES = 5;
-    double Smallliftlevel = 1.0;
-    double Groundliftlevel =0.0;
-
-    // target position as measured on playing field
+    // CONFIGURATION
+    // target positions on playing field
+    double distanceToJunction           = 0.1;          // feet
+    double distanceToRotate             = 0.7;          // feet
     // T=position from starting point to where we need to strafe for parking 1/3 (in feet)
-    double T=26.5/12.0;
+    double distanceToCone               = 26.5/12.0;    // feet
     // S=position from T to left or right for parking 1/3 (in feet)
-    double S=25.0/12.0;
+    double distanceSidewaysToParking    = 25.0/12.0;    // feet
     // P=position from starting point to parking position for 1/2/3 (in feet)
-    double P=38.0/12.0;
+    double distanceToParkingZone        = 38.0/12.0;    // feet
     //R=position where the robot can rotate at the beginning of the match to score.
 
-    //liftlevel in feet. Speed in 0-1
-    public void Lift(double liftlevel, float speed){
-
-        int tickTarget = (int)(liftlevel * robot.feetToTicks);
-        robot.liftMotor.setTargetPosition(tickTarget);
-
-        // tell motors to run to target position
-        robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        // set speed based on lift power
-        robot.liftMotor.setPower(speed);
-
-        // wait in this loop as long as at least 1 motor is still moving
-        // motors report busy until they reach the target position
-        while (opModeIsActive() && (robot.liftMotor.isBusy())) {
-            telemetry.addData("lift motor", robot.liftMotor.getCurrentPosition()*(1.0/robot.feetToTicks));
-            telemetry.update();
-        }
-        robot.liftMotor.setPower(0);
-
-    }
+    // lift
+    double smallLiftlevel   = 1.0;          // feet
+    double groundLiftlevel  = 0.0;          // feet
+    double liftPower        = 0.3f;         // 0-1
 
 
+    // instantiate a robot class
+    Robot robot = new Robot();
 
-    ElapsedTime runtime = new ElapsedTime();
+    // setup imu angles
+    Orientation angles      = new Orientation();
+    Orientation lastAngles  = new Orientation();
+    double      globalAngle = 0.0;
 
-    public void resetAngle()
-    {
-        lastAngles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-        globalAngle = 0;
-    }
-
-    public double getAngle() {
-
-        // We experimentally determined the Z axis is the axis we want to use for heading angle.
-        // We have to process the angle because the imu works in euler angles so the Z axis is
-        // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
-        // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
-
-        Orientation angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-        double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
-
-        if (deltaAngle < -180)
-            deltaAngle += 360;
-        else if (deltaAngle > 180)
-            deltaAngle -= 360;
-
-        globalAngle += deltaAngle;
-
-        lastAngles = angles;
-
-        return globalAngle;
-    }
-
-    public void rotate(int degrees, double power)
-    {
-        double  leftPower, rightPower;
-
-        // restart imu movement tracking.
-        resetAngle();
-
-        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
-        // clockwise (right).
-
-        if (degrees < 0)
-        {   // turn right.
-            leftPower = power;
-            rightPower = -power;
-
-        }
-        else if (degrees > 0)
-        {   // turn left.
-            leftPower = -power;
-            rightPower = power;
-        }
-        else return;
-
-        // set power to rotate.
-        robot.topRight.setPower(leftPower);
-        robot.bottomLeft.setPower(rightPower);
-        robot.topLeft.setPower(leftPower);
-        robot.bottomRight.setPower(rightPower);
-
-
-
-
-        // rotate until turn is completed.
-        if (degrees < 0)
-        {
-            // On right turn we have to get off zero first.
-            while (opModeIsActive() && getAngle() == 0) {}
-
-            while (opModeIsActive() && getAngle() > degrees) {}
-        }
-        else    // left turn.
-            while (opModeIsActive() && getAngle() < degrees) {}
-
-        // turn the motors off.
-        robot.topRight.setPower(0);
-        robot.bottomLeft.setPower(0);
-        robot.topLeft.setPower(0);
-        robot.bottomRight.setPower(0);
-
-        // wait for rotation to stop.
-        //sleep(1000);
-
-        // reset angle tracking on new heading.
-        resetAngle();
-    }
-
-    public void withoutEncoder() {
-        robot.topLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.bottomLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.bottomRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    }
-
-    public void withEncoder(){
-        robot.topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
 
     public void runOpMode() {
 
         // INITALIZE ROBOT
         robot.init(hardwareMap);
-
-
 
         // Set direction of all motors so that when we command
         // the direction "forward", the values of speed are positive
@@ -211,18 +61,12 @@ public class Auto extends LinearOpMode {
         robot.bottomRight.setDirection(DcMotor.Direction.REVERSE);
 
         // Stop motor and reset encoders to 0
-        robot.topLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.topRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.bottomLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.bottomRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.driveStopAndReset();
 
         // Enables motor encoders to track how much the motors have rotated
-        robot.topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.driveWithEncoder();
 
-        telemetry.addData("Mode", "calibrating...");
+        telemetry.addData("Calibrating gyro...");
         telemetry.update();
 
         // make sure the imu gyro is calibrated before continuing.
@@ -231,13 +75,10 @@ public class Auto extends LinearOpMode {
             idle();
         }
 
-        telemetry.addData("Mode", "waiting for start");
-        telemetry.addData("imu calib status", robot.imu.getCalibrationStatus().toString());
-        telemetry.update();
-
         // Wait for start button press on Driver Station
+        telemetry.addData("Waiting for start...");
+        telemetry.update();
         waitForStart();
-
 
         // While the mode is active (has not been stopped / time has not expired)
         if (opModeIsActive()) {
@@ -260,16 +101,16 @@ public class Auto extends LinearOpMode {
             robot.clawClose();
 
             //Test before rotating so the robot doesn't hit the wall.
-            drive("right", 0.6f, distanceToRotate);
+            driveToPosition("right", 0.6f, distanceToRotate);
 
             //Step 2
-            withoutEncoder();
+            robot.driveWithoutEncoder();
             rotate(130, 0.8);
-            withEncoder();
+            robot.driveWithEncoder();
 
 
             //Step3a
-            drive("backward", 0.3f, distanceToJunction);
+            driveToPosition("backward", 0.3f, distanceToJunction);
 
             //Step3b
             Lift(Smallliftlevel, LiftPower);
@@ -278,29 +119,26 @@ public class Auto extends LinearOpMode {
             robot.clawOpen();
 
             //Step3d
-            drive("forward", 0.1f, distanceToJunction);
+            driveToPosition("forward", 0.1f, distanceToJunction);
 
             //Step3e
             robot.clawClose();
 
             //Step3f
-            Lift(Groundliftlevel,LiftPower);
+            moveLift(groundLiftlevel, liftPower);
 
             //Step4
-            withoutEncoder();
+            robot.driveWithoutEncoder();
             rotate(135, 0.5);
-           withEncoder();
+            robot.driveWithEncoder();
 
 //
 //            rotate(90, 0.5);
 //
 //            // Drive forward at speed 0.1 while alpha is < 200
 //            double speed = 0.3;
-//            while (alphaAverage() < 200) {
-//                bottomRight.setPower(speed);
-//                topRight.setPower(speed);
-//                bottomLeft.setPower(speed);
-//                topLeft.setPower(speed);
+//            while (robot.alphaAverage(robot.colorSensorBack) < 200) {
+//                robot.setDrivePower(speed)
 //            }
 //
 //            // Once alpha >= 200, stop robot
@@ -309,9 +147,9 @@ public class Auto extends LinearOpMode {
 //            /* WE ARE AT "c", READ CONE */
 //
 //            // read cone color
-//            double red = redAverage();
-//            double green = greenAverage();
-//            double blue = blueAverage();
+//            double red = robot.redAverage(robot.colorSensorBack);
+//            double green = robot.greenAverage(robot.colorSensorBack);
+//            double blue = robot.blueAverage(robot.colorSensorBack);
 //
 //            // determine the max color value out of r,g,b
 //            double colorMax = Math.max(Math.max(red,green),blue);
@@ -369,47 +207,105 @@ public class Auto extends LinearOpMode {
         }
     }
 
-    // stop all the motors
-    public void stopMotors(){
-        robot.topRight.setPower(0);
-        robot.bottomRight.setPower(0);
-        robot.topLeft.setPower(0);
-        robot.bottomLeft.setPower(0);
+
+    // ROTATION FUNCTIONS
+    public double getAngle() {
+        // We experimentally determined the Z axis is the axis we want to use for heading angle.
+        // We have to process the angle because the imu works in euler angles so the Z axis is
+        // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
+        // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
+
+        Orientation angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
+
+        if (deltaAngle < -180)
+            deltaAngle += 360;
+        else if (deltaAngle > 180)
+            deltaAngle -= 360;
+
+        globalAngle += deltaAngle;
+
+        lastAngles = angles;
+
+        return globalAngle;
+    }
+    public void resetAngle() {
+        lastAngles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        globalAngle = 0;
+    }
+    public void rotateToAngle(int degrees, double power) {
+        double  leftPower, rightPower;
+
+        // restart imu movement tracking.
+        resetAngle();
+
+        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
+        // clockwise (right).
+
+        if (degrees < 0) {          // turn right.
+            leftPower = power;
+            rightPower = -power;
+
+        } else if (degrees > 0) {   // turn left.
+            leftPower = -power;
+            rightPower = power;
+        } else {                    // do not rotate at all
+            return;
+        };
+
+        // set power to rotate.
+        robot.topRight.setPower(rightPower);
+        robot.bottomLeft.setPower(leftPower);
+        robot.topLeft.setPower(leftPower);
+        robot.bottomRight.setPower(rightPower);
+
+        // rotate until turn is completed.
+        if (degrees < 0) {
+            // On right turn we have to get off zero first.
+            while (opModeIsActive() && getAngle() == 0) {}
+
+            while (opModeIsActive() && getAngle() > degrees) {}
+        } else {    // left turn.
+            while (opModeIsActive() && getAngle() < degrees) {}
+        }
+
+        // turn the motors off.
+        robot.stopDriveMotors();
+
+        // reset angle tracking on new heading.
+        resetAngle();
     }
 
-//    public void rotate(double degree, double speed) {
-//
-////        if (degree > 0.0) {
-////            telemetry.addData("rotate counter clockwise to", degree);
-////        }
-////        else {
-////            telemetry.addData("rotate clockwise to", degree);
-////        }
-//        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-//
-//        double delta =Math.abs( degree-angles.firstAngle);
-//
-//        while (delta > 0.0 ){
-//            telemetry.addData("rotate", delta);
-//            telemetry.update();
-//            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-//
-//            delta =Math.abs( degree-angles.firstAngle);
-//        }
-//        telemetry.addLine("stop rotating");
-//        telemetry.update();
-//
-//
-//    }
+    // LIFT FUNCTIONS
+    // move lift to liftLevel (double) at speed
+    public void moveLift(double liftlevel, float speed){
+
+        int tickTarget = (int)(liftlevel * robot.feetToTicks);
+        robot.liftMotor.setTargetPosition(tickTarget);
+
+        // tell motors to run to target position
+        robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // set speed based on lift power
+        robot.liftMotor.setPower(speed);
+
+        // wait in this loop as long as at least 1 motor is still moving
+        // motors report busy until they reach the target position
+        while (opModeIsActive() && (robot.liftMotor.isBusy())) {
+            telemetry.addData("lift motor", robot.liftMotor.getCurrentPosition()*(1.0/robot.feetToTicks));
+            telemetry.update();
+        }
+        robot.liftMotor.setPower(0);
+
+    }
+
+    // DRIVE FUNCTIONS
     // Direction=forward/backward/left/right
     // Speed=0.0-1.0
     // Target=Feet
-    public void drive(String direction, float speed, double target){
+    public void driveToPosition(String direction, float speed, double target){
         // stop motors and reset encoder to 0
-        robot.topLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.topRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.bottomLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.bottomRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.driveStopAndReset();
 
         // convert our target (in feet) to ticks that the motor can understand
         int tickTarget = (int)(target * robot.feetToTicks);
@@ -445,19 +341,11 @@ public class Auto extends LinearOpMode {
             robot.bottomRight.setTargetPosition(tickTarget);
         }
 
-        // tell motors to run to target position
-        robot.topLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.topRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.bottomLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.bottomRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        // tell motors to be in run to target position mode
+        robot.driveRunToPosition();
 
-        // set speed based on input
-        // NOTE: all positive speeds because direction is specified by signs
-        // given to setTargetPosition
-        robot.topRight.setPower(speed);
-        robot.bottomRight.setPower(speed);
-        robot.topLeft.setPower(speed);
-        robot.bottomLeft.setPower(speed);
+        // set drive speed
+        robot.setDrivePower(speed);
 
         // wait in this loop as long as at least 1 motor is still moving
         // motors report busy until they reach the target position
@@ -470,78 +358,11 @@ public class Auto extends LinearOpMode {
         }
 
         // stop motors
-        stopMotors();
-    }
-    //Clockwise = -90
-    //Counter-clockwise = 90
-    //Behind = -180
-    public void rotate(double degree, float speed) {
-
-    }
-    // returns an average alpha value
-    public double alphaAverage() {
-
-        // initalize alphaSum to 0
-        int alphaSum = 0;
-
-        // run for NUM_SAMPLES iterations
-        for (int i = 0; i < NUM_SAMPLES; i++) {
-            // increment alphaSum by our new alpha color sensor reading
-            alphaSum += robot.colorSensorBack.alpha();
-        }
-
-        // return the average alpha value (alphaSum divided by the number of samples we take)
-        return (double)alphaSum / (double)NUM_SAMPLES;
+        robot.stopDriveMotors();
     }
 
-    // return an average red value
-    public double redAverage() {
 
-        // initalize redSum to 0
-        int redSum = 0;
-
-        // run for NUM_SAMPLES iterations
-        for (int i = 0; i < NUM_SAMPLES; i++) {
-            // increment redSum by our new red color sensor reading
-            redSum += robot.colorSensorBack.red();
-        }
-
-        // return the average red value (redSum divided by the number of samples we take)
-        return (double)redSum / (double)NUM_SAMPLES;
-    }
-
-    // return an average blue value
-    public double blueAverage() {
-
-        // initalize blueSum to 0
-        int blueSum = 0;
-
-        // run for NUM_SAMPLES iterations
-        for (int i = 0; i < 5; i++) {
-            // increment blueSum by our new blue color sensor reading
-            blueSum += robot.colorSensorBack.blue();
-        }
-
-        // return the average blue value (blueSum divided by the number of samples we take)
-        return (double)blueSum / (double)NUM_SAMPLES;
-    }
-
-    // return an average green value
-    public double greenAverage() {
-
-        // initalize greenSum to 0
-        int greenSum = 0;
-
-        // run for NUM_SAMPLES iterations
-        for (int i = 0; i < 5; i++) {
-            // increment greenSum by our new green color sensor reading
-            greenSum += robot.colorSensorBack.green();
-        }
-
-        // return the average green value (greenSum divided by the number of samples we take)
-        return (double)greenSum / (double)NUM_SAMPLES;
-    }
-
+    // COLOR SENSOR FUNCTIONS
     // check if the input color sensor r,g,b values represent parking zone 1
     public boolean isParking1(double r, double g, double b) {
 
@@ -574,7 +395,6 @@ public class Auto extends LinearOpMode {
             return true;
         } else return false;
     }
-
     // check if the input color sensor r,g,b values represent parking zone 3
     public boolean isParking3(double r, double g, double b) {
 
