@@ -36,7 +36,7 @@ public class Auto extends LinearOpMode {
     // lift
     double smallLiftlevel   = 1.0;          // feet
     double groundLiftlevel  = 0.0;          // feet
-    double liftPower        = 0.3f;         // 0-1
+    float liftPower        = 0.3f;         // 0-1
 
 
     // instantiate a robot class
@@ -66,7 +66,7 @@ public class Auto extends LinearOpMode {
         // Enables motor encoders to track how much the motors have rotated
         robot.driveWithEncoder();
 
-        telemetry.addData("Calibrating gyro...");
+        telemetry.addLine("Calibrating gyro...");
         telemetry.update();
 
         // make sure the imu gyro is calibrated before continuing.
@@ -76,7 +76,7 @@ public class Auto extends LinearOpMode {
         }
 
         // Wait for start button press on Driver Station
-        telemetry.addData("Waiting for start...");
+        telemetry.addLine("Waiting for start...");
         telemetry.update();
         waitForStart();
 
@@ -105,7 +105,7 @@ public class Auto extends LinearOpMode {
 
             //Step 2
             robot.driveWithoutEncoder();
-            rotate(130, 0.8);
+            rotateToAngle(130, 0.8);
             robot.driveWithEncoder();
 
 
@@ -113,7 +113,7 @@ public class Auto extends LinearOpMode {
             driveToPosition("backward", 0.3f, distanceToJunction);
 
             //Step3b
-            Lift(Smallliftlevel, LiftPower);
+            moveLift(smallLiftlevel, liftPower);
 
             //Step3c
             robot.clawOpen();
@@ -129,7 +129,7 @@ public class Auto extends LinearOpMode {
 
             //Step4
             robot.driveWithoutEncoder();
-            rotate(135, 0.5);
+            rotateToAngle(135, 0.5);
             robot.driveWithEncoder();
 
 //
