@@ -149,7 +149,7 @@ public class Robot {
         int blueSum = 0;
 
         // run for colorSensorSamples iterations
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < colorSensorSamples; i++) {
             // increment blueSum by our new blue color sensor reading
             blueSum += colorSensor.blue();
         }
@@ -165,7 +165,7 @@ public class Robot {
         int greenSum = 0;
 
         // run for colorSensorSamples iterations
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < colorSensorSamples; i++) {
             // increment greenSum by our new green color sensor reading
             greenSum += colorSensor.green();
         }

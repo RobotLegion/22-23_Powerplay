@@ -13,16 +13,14 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.ButtonReader;
 
-// started with 475!
-
 @TeleOp(name = "Fy22TeleOp", group = "TeleOp" )
 public class Teleop extends LinearOpMode {
 
     // CONFIGURATION
+    boolean DEBUG           = true;
     double speed            = 1.0;
-    double speedfactor      = 0.1;
-    float  liftPower        = 0.5f;
-
+    double speedFactor;
+    float  liftPower        = 0.0f;
 
     // STATE
     boolean liftIsMoving    = false;
@@ -34,18 +32,22 @@ public class Teleop extends LinearOpMode {
     // setup robot class
     Robot robot = new Robot();
 
-
     @Override
     public void runOpMode() throws InterruptedException {
 
         // initalize robot
         robot.init(hardwareMap);
 
-       
+        // Stop motor and reset encoders to 0
+        robot.driveStopAndReset();
+
+        // Enables motor encoders to track how much the motors have rotated
+        robot.driveWithoutEncoder();
+
         // setup lift motor
         robot.liftMotor.setDirection(DcMotor.Direction.REVERSE);
         robot.liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.liftMotor.setMode(DcMotor.RunMode.RUN_ENCODER);
 
         // setup gamepad extension class
         GamepadEx myGamepad2 = new GamepadEx(gamepad2);
@@ -58,8 +60,6 @@ public class Teleop extends LinearOpMode {
 
         // open claw
         robot.clawOpen();
-
-       
 
         while (opModeIsActive()) {
 
@@ -74,200 +74,137 @@ public class Teleop extends LinearOpMode {
             myGamepad2.readButtons();
 
 
+            // CLAW
+            if (myGamepad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
+                robot.clawClose();
+            } else if (myGamepad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.05) {
+                robot.clawOpen();
+            }
+
+            // DRIVETRAIN
+            // Mechanum formulas
+            double topRightSpeed                = gamepad1LeftY + gamepad1LeftX + gamepad1RightX;           //Combines the inputs of the sticks to clip their output to a value between 1 and -1
+            double topLeftSpeed                 = -gamepad1LeftY + gamepad1LeftX + gamepad1RightX;          //Combines the inputs of the sticks to clip their output to a value between 1 and -1
+            double bottomRightSpeed             = gamepad1LeftY - gamepad1LeftX + gamepad1RightX;           //Combines the inputs of the sticks to clip their output to a value between 1 and -1
+            double bottomLeftSpeed              = -gamepad1LeftY - gamepad1LeftX + gamepad1RightX;          //Combines the inputs of the sticks to clip their output to a value between 1 and -1
+            double topLeftCorrectedSpeed        = Range.clip(Math.pow(topRightSpeed, 3), -speed, speed);    //Slows down the motor and sets its max/min speed to the double "speed"
+            double topRightCorrectedSpeed       = Range.clip(Math.pow(topLeftSpeed, 3), -speed, speed);     //Slows down the motor and sets its max/min speed to the double "speed"
+            double bottomLeftCorrectedSpeed     = Range.clip(Math.pow(bottomRightSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
+            double bottomRightCorrectedSpeed    = Range.clip(Math.pow(bottomLeftSpeed, 3), -speed, speed);  //Slows down the motor and sets its max/min speed to the double "speed"
+
+            // speed override, go faster by pressing the right trigger
+            if (myGamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
+                speedFactor = 0.8;
+            } else {
+                speedFactor = 0.5;
+            }
+            topRight.setPower(topRightCorrectedSpeed * speedFactor);
+            bottomRight.setPower(bottomRightCorrectedSpeed * speedFactor);
+            topLeft.setPower(topLeftCorrectedSpeed * speedFactor);
+            bottomLeft.setPower(bottomLeftCorrectedSpeed * speedFactor);
+
+
+            // LIFT
+            if (robot.liftMotor.isBusy()) { // executing a bumper press
+                // nothing to see here...
+                if (DEBUG) {
+                    telemetry.addData("lift", LiftMotor.getCurrentPosition() * (1.0 / feetToTicks));
+                }
+            } else { // not currently executing a bumper press
+
+                // put the motor back in to encoder mode that can be controlled by a joystick
+                robot.liftMotor.setMode(DcMotor.RunMode.RUN_WITH_ENCODER);
+                
+                // TODO: software lift limit!!!!!
+                // myGamepad2.isDown(GamepadKeys.Button.B)
+                if (Math.abs(gamepad2RightY) > 0.05) {  // joystick control
+                    liftPower = (gamepad2RightY * 0.2) + Math.copySign(0.5, gamepad2RightY);
+                } else {
+                    liftPower = 0.0;
+                }
+                robot.liftMotor.setPower(liftPower);
+                
+            }
             // check if gamepad2 LB was pressed, move lift up!
             if (myGamepad2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-                //decrement currentliftlevel
-                if (Currentliftlevel > 0) {
-                    Currentliftlevel--;
+                //decrement currentLiftLevel
+                if (currentLiftLevel > 0) {
+                    currentLiftLevel--;
+                    moveLiftNonBlocking(liftLevels[currentLiftLevel], 0.7f);
                 }
-                moveLiftNonBlocking(liftLevels[Currentliftlevel], 0.7f);
             }
-
             // check if gamepad2 RB was pressed, move lift down!
-           if (myGamepad2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-                //incrementing currentliftlevel
-                if (Currentliftlevel < liftLevels.length - 1) {
-                    Currentliftlevel++;
+            if (myGamepad2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+                //incrementing currentLiftLevel
+                if (currentLiftLevel < liftLevels.length - 1) {
+                    currentLiftLevel++;
+                    moveLiftNonBlocking(liftLevels[currentLiftLevel], 0.5f);
                 }
-                moveLiftNonBlocking(liftLevels[Currentliftlevel], 0.5f);
-           }
-
-            //TODO: Use liftIsMoving variable
-            if (LiftMotor.isBusy()) {
-                telemetry.addData("lift", LiftMotor.getCurrentPosition() * (1.0 / feetToTicks));
-
-                telemetry.update();
-            } else {
-                LiftMotor.setPower(0);
-            }
-
-            // TODO: disable this if liftIsMoving is true
-            if (Math.abs(gamepad2RightY) > 0.05) {
-                liftPower = (gamepad2RightY * 0.2) + Math.copySign(0.5, gamepad2RightY);
-            } else {
-                liftPower = 0.0;
-            }
-
-            // TODO: this needs to be cleaned up
-            double currentFeet = LiftMotor.getCurrentPosition() * ticksToFeet;
-            if (myGamepad2.isDown(GamepadKeys.Button.B)) {   // PRESS B TO OVERRIDE MIN AND MAX SAFTEY
-                // if ( (currentFeet <= 0.0 && LiftPower < 0.0) || (currentFeet >= Mediumliftlevel && LiftPower > 0.0) )
-                // {
-                //     LiftPower = 0.0;
-                // }
-                LiftMotor.setPower(LiftPower);
             }
 
 
-            // check if gamepad2 LB
-            // TODO: update this to trigger!
-            if (myGamepad2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-                if (claw.getPosition() > 0.5) {
-                    robot.clawOpen();
+            // COLOR SENSOR
+            double redAvg       = robot.redAverage(robot.colorSensorBack);
+            double greenAvg     = robot.greenAverage(robot.colorSensorBack);
+            double blueAvg      = robot.blueAverage(robot.colorSensorBack);
+            double alphaAvg     = robot.alphaAverage(robot.colorSensorBack);
+
+            // find the max of the red, green, and blue colors
+            double colorMax     = Math.max(Math.max(redAvg, greenAvg), blueAvg);
+
+            // dividing the colors by the max to get the norm
+            double redNorm      = redAvg   / colorMax;
+            double greenNorm    = greenAvg / colorMax;
+            double blueNorm     = blueAvg  / colorMax;
+            
+
+            if (DEBUG) {
+                // Printing out the color values
+                telemetry.addData("Red norm", redNorm);
+                telemetry.addData("Green norm", greenNorm);
+                telemetry.addData("Blue norm", blueNorm);
+                telemetry.addData("Red", redAvg);
+                telemetry.addData("Green", greenAvg);
+                telemetry.addData("Blue", blueAvg);
+                telemetry.addData("Alpha", alphaAvg);
+                telemetry.addData("encoder-top-right", topRight.getCurrentPosition());
+                telemetry.addData("LiftMotor", LiftMotor.getCurrentPosition());
+
+                if (alphaAvg >= 300.0) {
+                    // color sensor is valid
+        
+                    boolean poleCheck       = isPole(redNorm, greenNorm, blueNorm);
+                    boolean redConeCheck    = isRedCone(redNorm, greenNorm, blueNorm);
+                    boolean blueConeCheck   = isBlueCone(redNorm, greenNorm, blueNorm);
+        
+                    //Prints out the results
+                    telemetry.addData("Pole", poleCheck);
+                    telemetry.addData("RedCone", redConeCheck);
+                    telemetry.addData("BlueCone", blueConeCheck);
                 } else {
-                    robot.clawClose();
+                    // color sensor is not valid
+                    telemetry.addLine("color sensor invaild");
                 }
+        
+                // push telemetry update
+                telemetry.update();
             }
-
-            //Mechanum formulas
-            double TopRightSpeed = gamepad1LeftY + gamepad1LeftX + gamepad1RightX; //Combines the inputs of the sticks to clip their output to a value between 1 and -1
-            double TopLeftSpeed = -gamepad1LeftY + gamepad1LeftX + gamepad1RightX; //Combines the inputs of the sticks to clip their output to a value between 1 and -1
-            double BottomRightSpeed = gamepad1LeftY - gamepad1LeftX + gamepad1RightX; //Combines the inputs of the sticks to clip their output to a value between 1 and -1
-            double BottomLeftSpeed = -gamepad1LeftY - gamepad1LeftX + gamepad1RightX; //Combines the inputs of the sticks to clip their output to a value between 1 and -1
-
-            // sets speed
-            //I changed 3 to 2 in an attempt to make the robot drive slower
-            double topLeftCorrectedSpeed = Range.clip(Math.pow(TopRightSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
-            double topRightCorrectedSpeed = Range.clip(Math.pow(TopLeftSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
-            double bottomLeftCorrectedSpeed = Range.clip(Math.pow(BottomRightSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
-            double bottomRightCorrectedSpeed = Range.clip(Math.pow(BottomLeftSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
-
-            if (myGamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
-                speedfactor = 0.8;
-            } else {
-                speedfactor = 0.5;
-            }
-            topRight.setPower(topRightCorrectedSpeed * speedfactor);
-            bottomRight.setPower(bottomRightCorrectedSpeed * speedfactor);
-            topLeft.setPower(topLeftCorrectedSpeed * speedfactor);
-            bottomLeft.setPower(bottomLeftCorrectedSpeed * speedfactor);
-
-
-
-            // TODO: is this required
-            robot.liftMotor.setPower(liftPower);
-
-            double redAvg       = robot.redAverage(robot.colorSensorBack)
-            double greenAvg     = (double) greenSum / 5.0;
-            double blueAvg      = (double) blueSum / 5.0;
-            double alphaAvg     = (double) alphaSum / 5.0;
        }
-
-       
-
-
-       
-
-       
-
-
-       // It intialize the sum to 0
-       int redSum = 0;
-       int greenSum = 0;
-       int blueSum = 0;
-       int alphaSum = 0;
-
-       // It adds the color sensor readings of Red, Green, Blue, and Alpha
-       for (int i = 0; i < 5; i++) {
-           redSum += color.red();
-           greenSum += color.green();
-           blueSum += color.blue();
-           alphaSum += color.alpha();
-       }
-
-       //It div all the number to find the average
-       double redAvg = (double) redSum / 5.0;
-       double greenAvg = (double) greenSum / 5.0;
-       double blueAvg = (double) blueSum / 5.0;
-       double alphaAvg = (double) alphaSum / 5.0;
-
-       // Findng the max of r,g and b
-       double colorMax = Math.max(Math.max(redAvg, greenAvg), blueAvg);
-
-       // dividing the colors by the max to get the norm
-       double redNorm = redAvg / colorMax;
-       double greenNorm = greenAvg / colorMax;
-       double blueNorm = blueAvg / colorMax;
-
-       // Printing out the color values
-       telemetry.addData("Red norm", redNorm);
-       telemetry.addData("Green norm", greenNorm);
-       telemetry.addData("Blue norm", blueNorm);
-       telemetry.addData("Red", redAvg);
-       telemetry.addData("Green", greenAvg);
-       telemetry.addData("Blue", blueAvg);
-       telemetry.addData("Alpha", alphaAvg);
-       telemetry.addData("encoder-top-right", topRight.getCurrentPosition());
-       telemetry.addData("LiftMotor", LiftMotor.getCurrentPosition());
-
-
-       if (alphaAvg >= 300.0) {
-           // color sensor is valid
-
-           // Takes the norm and detects the is statements
-           boolean poleCheck = isPole(redNorm, greenNorm, blueNorm);
-           boolean redConeCheck = isRedCone(redNorm, greenNorm, blueNorm);
-           boolean blueConeCheck = isBlueCone(redNorm, greenNorm, blueNorm);
-
-           //Prints out the results
-           telemetry.addData("Pole", poleCheck);
-           telemetry.addData("RedCone", redConeCheck);
-           telemetry.addData("BlueCone", blueConeCheck);
-       } else {
-           // color sensor is not valid
-           telemetry.addLine("color sensor invaild");
-       }
-
-       // push telemetry update
-       telemetry.update();
-
-
-//minimum color value
-       //green, magenta, turquoise
-       //blue & red 2
-
-
    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     // LIFT FUNCTIONS
-
     // set lift to target position and then return, do not block in function
     public void moveLiftNonBlocking(double liftlevel, float speed) {
 
         int tickTarget = (int)(liftlevel * feetToTicks);
         robot.liftMotor.setTargetPosition(tickTarget);
 
+        // TODO: do we have to check if the lift is NOT busy here before changing the run mode?
         // tell motors to run to target position
         robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // set speed based on lift power
         robot.liftMotor.setPower(speed);
-
-        // set global variable liftIsMoving to true to indicate a lift command is being executed
-        liftIsMoving = true;
     }
 
 
@@ -367,7 +304,4 @@ public class Teleop extends LinearOpMode {
             return false;
         }
     }
-
 }
-
-
