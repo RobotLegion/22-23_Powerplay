@@ -55,7 +55,7 @@ public class Robot {
         bottomLeft      = hardwareMap.dcMotor.get("bottomLeft");                // control hub port 3
         
         // initalize claw
-        clawServo       = hardwareMap.servo.get("claw");                        // expansion hub port 0
+        clawServo       = hardwareMap.servo.get("clawServo");                        // expansion hub port 0
         clawServo.scaleRange(clawOpenPosition, clawClosePosition);
 
         // initalize lift

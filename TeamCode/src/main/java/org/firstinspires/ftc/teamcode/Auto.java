@@ -5,6 +5,7 @@ import org.firstinspires.ftc.teamcode.Robot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
@@ -23,7 +24,7 @@ public class Auto extends LinearOpMode {
 
     // CONFIGURATION
     // target positions on playing field
-    double distanceToJunction           = 0.1;          // feet
+    double distanceToJunction           = 0.4;          // feet
     double distanceToRotate             = 0.7;          // feet
     // T=position from starting point to where we need to strafe for parking 1/3 (in feet)
     double distanceToCone               = 26.5/12.0;    // feet
@@ -33,6 +34,8 @@ public class Auto extends LinearOpMode {
     double distanceToParkingZone        = 38.0/12.0;    // feet
     //R=position where the robot can rotate at the beginning of the match to score.
 
+    float rotateSpeed                   = 0.4f;
+
     // lift
     float liftPower                     = 0.5f;         // 0-1
 
@@ -41,7 +44,7 @@ public class Auto extends LinearOpMode {
     Robot robot = new Robot();
 
     // setup imu angles
-    Orientation angles      = new Orientation();
+//    Orientation angles      = new Orientation();
     Orientation lastAngles  = new Orientation();
     double      globalAngle = 0.0;
 
@@ -53,10 +56,10 @@ public class Auto extends LinearOpMode {
 
         // Set direction of all motors so that when we command
         // the direction "forward", the values of speed are positive
-        robot.topLeft.setDirection(DcMotor.Direction.FORWARD);
-        robot.topRight.setDirection(DcMotor.Direction.REVERSE);
-        robot.bottomLeft.setDirection(DcMotor.Direction.FORWARD);
-        robot.bottomRight.setDirection(DcMotor.Direction.REVERSE);
+        robot.topLeft.setDirection(DcMotor.Direction.REVERSE);
+        robot.topRight.setDirection(DcMotor.Direction.FORWARD);
+        robot.bottomLeft.setDirection(DcMotor.Direction.REVERSE);
+        robot.bottomRight.setDirection(DcMotor.Direction.FORWARD);
 
         // Stop motor and reset encoders to 0
         robot.driveStopAndReset();
@@ -83,7 +86,7 @@ public class Auto extends LinearOpMode {
 
             /* WE ARE AT STARTING POSITION */
             //Step 1= close claw
-            //Step 2= rotate counter clockwise -135 deg
+            //Step 2= rotate counter clockwise 135 deg
             //Step 3 = score
                 //Step 3a= drive to junction
                 //Step 3b= lift up to small position
@@ -91,7 +94,7 @@ public class Auto extends LinearOpMode {
                 //Step 3d = backup
                 //Step 3e= close claw
                 //Step 3f= lower lift
-            //Step 4= rotate -135 so the back of the robot faces the signal cone.
+            //Step 4= rotate 135 so the back of the robot faces the signal cone.
             //Step 5= Basic Auto
 
 
@@ -99,16 +102,16 @@ public class Auto extends LinearOpMode {
             robot.clawClose();
 
             //Test before rotating so the robot doesn't hit the wall.
-            driveToPosition("right", 0.6f, distanceToRotate);
+            driveToPosition("left", 0.6f, distanceToRotate);
 
             //Step 2
             robot.driveWithoutEncoder();
-            rotateToAngle(130, 0.8);
+            rotateToAngle(135, rotateSpeed);
             robot.driveWithEncoder();
 
 
             //Step3a
-            driveToPosition("backward", 0.3f, distanceToJunction);
+            driveToPosition("forward", 0.3f, distanceToJunction);
 
             //Step3b
             moveLiftBlocking(robot.smallLiftlevel, liftPower);
@@ -117,7 +120,7 @@ public class Auto extends LinearOpMode {
             robot.clawOpen();
 
             //Step3d
-            driveToPosition("forward", 0.1f, distanceToJunction);
+            driveToPosition("backward", 0.1f, distanceToJunction);
 
             //Step3e
             robot.clawClose();
@@ -127,14 +130,11 @@ public class Auto extends LinearOpMode {
 
             //Step4
             robot.driveWithoutEncoder();
-            rotateToAngle(135, 0.5);
+            rotateToAngle(135, rotateSpeed);
             robot.driveWithEncoder();
 
-
-            rotateToAngle(90, 0.5);
-
             // Drive forward at speed 0.1 while alpha is < 200
-            double speed = 0.3;
+            double speed = -0.3;
             while (robot.alphaAverage(robot.colorSensorBack) < 200) {
                 robot.setDrivePower(speed);
             }
@@ -167,36 +167,36 @@ public class Auto extends LinearOpMode {
                 telemetry.update();
 
                 // drive forward at 0.2 speed to position T (relative)
-                driveToPosition("forward",0.4f,distanceToParkingZone-c);
+                driveToPosition("backward",0.4f,distanceToParkingZone-c);
 
                 //At position T turn cw 135 deg
-                rotateToAngle(135, 0.8);
+           //     rotateToAngle(135, rotateSpeed);
 
                 // drive left at 0.4 speed to position S (relative)
-                driveToPosition("left",0.4f,distanceSidewaysToParking);
+                driveToPosition("right",0.4f,distanceSidewaysToParking);
 
                 // drive forward at 0.2 speed to position P (relative)
-                driveToPosition("forward",0.3f,distanceToParkingZone-c);
+                driveToPosition("backward",0.3f,distanceToParkingZone-c);
             }
             else if (isParking3(redNorm, greenNorm, blueNorm)){
                 telemetry.addLine("Parking 3");
                 telemetry.update();
 
                 // drive forward at 0.2 speed to position T (relative)
-                driveToPosition("forward",0.4f,distanceToCone-c);
+                driveToPosition("backward",0.4f,distanceToCone-c);
 
                 // drive right at 0.4 speed to position S (relative)
-                driveToPosition("right",0.4f,distanceSidewaysToParking);
+                driveToPosition("left",0.4f,distanceSidewaysToParking);
 
                 // drive forward at 0.2 speed to position P (relative)
-                driveToPosition("forward",0.4f,distanceToParkingZone-c);
+                driveToPosition("backward",0.4f,distanceToParkingZone-c);
             }
             else {
                 telemetry.addLine("Parking 2");
                 telemetry.update();
 
                 // drive forward at 0.2 speed to position P (relative)
-                driveToPosition("forward",0.4f,distanceToParkingZone-c);
+                driveToPosition("backward",0.4f,distanceToParkingZone-c);
             }
 
             /* WE ARE AT PARKING POSITION */
@@ -205,6 +205,11 @@ public class Auto extends LinearOpMode {
         }
     }
 
+    public void resetAngle(){
+        lastAngles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+        globalAngle = 0.0;
+    }
 
     // ROTATION FUNCTIONS
     public double getAngle() {
@@ -227,14 +232,9 @@ public class Auto extends LinearOpMode {
 
         return globalAngle;
     }
-    public void resetAngle() {
-        lastAngles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        globalAngle = 0;
-    }
     public void rotateToAngle(int degrees, double power) {
         double  leftPower, rightPower;
 
-        // restart imu movement tracking.
         resetAngle();
 
         // getAngle() returns + when rotating counter clockwise (left) and - when rotating
@@ -258,20 +258,23 @@ public class Auto extends LinearOpMode {
         robot.bottomRight.setPower(rightPower);
 
         // rotate until turn is completed.
-        if (degrees < 0) {
-            // On right turn we have to get off zero first.
-            while (opModeIsActive() && getAngle() == 0) {}
+        if (degrees < 0) {  // CW
+            while (opModeIsActive() && getAngle() > degrees) {
+                telemetry.addData("angle", globalAngle);
+                telemetry.update();
+            }
+        } else {    // left turn. CCW
+            while (opModeIsActive() && getAngle() < degrees) {
+                telemetry.addData("angle", globalAngle);
+                telemetry.addData("degrees", degrees);
+                telemetry.update();
 
-            while (opModeIsActive() && getAngle() > degrees) {}
-        } else {    // left turn.
-            while (opModeIsActive() && getAngle() < degrees) {}
+            }
         }
 
         // turn the motors off.
         robot.stopDriveMotors();
 
-        // reset angle tracking on new heading.
-        resetAngle();
     }
 
     // LIFT FUNCTIONS

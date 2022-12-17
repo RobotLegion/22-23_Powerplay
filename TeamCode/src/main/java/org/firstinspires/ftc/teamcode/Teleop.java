@@ -2,13 +2,19 @@ package org.firstinspires.ftc.teamcode;
 
 import org.firstinspires.ftc.teamcode.Robot;
 
+//import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+//import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
+//import java.util.concurrent.TimeUnit;
+
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.hardware.ColorSensor;
+//import org.firstinspires.ftc.robotcore.external.ClassFactory;
+//import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+//import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.ButtonReader;
@@ -21,6 +27,7 @@ public class Teleop extends LinearOpMode {
     double speed            = 1.0;
     double speedFactor;
     float  liftPower        = 0.0f;
+    float  liftButtonSpeed  = 0.75f;
 
     // STATE
     boolean liftIsMoving    = false;
@@ -28,6 +35,26 @@ public class Teleop extends LinearOpMode {
     float   gamepad1LeftX   = 0.0f;
     float   gamepad1RightX  = 0.0f;
     float   gamepad2RightY  = 0.0f;
+
+
+//    private static final String VUFORIA_KEY = "AUz/xEr/////AAABmZjEf3Mc1kGYkOsXVF3u1Gl8gO6qZozGZxty6mcO/xE35elxxgMBwh4/zzwC9Dh4EPKvDexbQAVpjQJzz+Cx+PMYbKiPfvJNsyHDoJkWCPC1skmjKJq/4ctLkD1zGtWPhVUsdGK9ib6ze346j5nHgoFwzoi4SAITZUfQZEj2ccyiWs3zvY2DzbL/QgXrk391epqrpmB6y96vnvCsTUYA6i1y8pg7TZmjUBNWC/3PMr0EHBAFzu+cgtMWVD2sjR9XYcyh9eCRKFNq1aZwikL2P2F4Px5eyujkCVBsnQ0N+dNBo/UCREIF2az5iJY/x+qnrr8aZ2Rj1Gri12gHuKLT7BWS73HKsC9XVURurHz9RmJs";
+//
+//    // Declare class members
+//    private VuforiaLocalizer vuforia    = null;
+//    private WebcamName webcamName       = null;
+//
+//    ExposureControl myExposureControl;  // declare exposure control object
+//    long minExp;
+//    long maxExp;
+//    long curExp;            // exposure is duration, in time units specified
+//
+//    GainControl myGainControl;      // declare gain control object
+//    int minGain;
+//    int maxGain;
+//    int curGain;
+//    boolean wasSetGainSuccessful;   // returned from setGain()
+//
+//
 
     // setup robot class
     Robot robot = new Robot();
@@ -52,6 +79,67 @@ public class Teleop extends LinearOpMode {
         // setup gamepad extension class
         GamepadEx myGamepad2 = new GamepadEx(gamepad2);
         GamepadEx myGamepad1 = new GamepadEx(gamepad1);
+
+
+//        telemetry.setMsTransmissionInterval(50);
+//
+//        // Connect to the webcam, using exact name per robot Configuration.
+//        webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+//
+//        /*
+//         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+//         * We pass Vuforia the handle to a camera preview resource (on the RC screen).
+//         */
+//
+//        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+//        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+//        // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+//
+//        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+//
+//        // We also indicate which camera we wish to use.
+//        parameters.cameraName = webcamName;
+//
+//        // Assign the Vuforia engine object.
+//        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+//
+//        // Assign the exposure and gain control objects, to use their methods.
+//        myExposureControl = vuforia.getCamera().getControl(ExposureControl.class);
+//        myGainControl = vuforia.getCamera().getControl(GainControl.class);
+//
+//        // Display exposure features and settings of this webcam.
+//    //    checkExposureFeatures();
+//
+//        // Retrieve from webcam its current exposure and gain values.
+//        curExp = myExposureControl.getExposure(TimeUnit.MILLISECONDS);
+//        curGain = myGainControl.getGain();
+
+//        // Display mode and starting values to user.
+//        telemetry.addLine("\nTouch Start arrow to control webcam Exposure and Gain");
+//        telemetry.addData("\nCurrent exposure mode", myExposureControl.getMode());
+//        telemetry.addData("Current exposure value", curExp);
+//        telemetry.addData("Current gain value", curGain);
+//        telemetry.update();
+//
+
+//        // Get webcam exposure limits.
+//        minExp = myExposureControl.getMinExposure(TimeUnit.MILLISECONDS);
+//        maxExp = myExposureControl.getMaxExposure(TimeUnit.MILLISECONDS);
+//
+//        // Get webcam gain limits.
+//        minGain = myGainControl.getMinGain();
+//        maxGain = myGainControl.getMaxGain();
+//
+//        // Change mode to Manual, in order to control directly.
+//        // A non-default setting may persist in the camera, until changed again.
+//        myExposureControl.setMode(ExposureControl.Mode.Auto);
+//
+//        // Set initial exposure and gain, same as current.
+////        myExposureControl.setExposure(curExp, TimeUnit.MILLISECONDS);
+////        myGainControl.setGain(curGain);
+//
+//        // This loop allows manual adjustment of exposure and gain,
+//        // while observing the effect on the preview image.
 
         // Wait for start button press on Driver Station
         telemetry.addLine("Waiting for start...");
@@ -118,7 +206,12 @@ public class Teleop extends LinearOpMode {
                 // TODO: software lift limit!!!!!
                 // myGamepad2.isDown(GamepadKeys.Button.B)
                 if (Math.abs(gamepad2RightY) > 0.05) {  // joystick control
-                    liftPower = (gamepad2RightY * 0.2f) + Math.copySign(0.5f, gamepad2RightY);
+                    if (robot.liftMotor.getCurrentPosition() < robot.liftLevels[robot.liftLevels.length-1] ||
+                            robot.liftMotor.getCurrentPosition() > robot.liftLevels[0]) {
+                        liftPower = (gamepad2RightY * 0.2f) + Math.copySign(0.5f, gamepad2RightY);
+                    } else {
+                        liftPower = 0.0f;
+                    }
                 } else {
                     liftPower = 0.0f;
                 }
@@ -130,7 +223,7 @@ public class Teleop extends LinearOpMode {
                 //decrement currentLiftLevel
                 if (robot.currentLiftLevel > 0) {
                     robot.currentLiftLevel--;
-                    moveLiftNonBlocking(robot.liftLevels[robot.currentLiftLevel], 0.7f);
+                    moveLiftNonBlocking(robot.liftLevels[robot.currentLiftLevel], liftButtonSpeed);
                 }
             }
             // check if gamepad2 RB was pressed, move lift down!
@@ -138,7 +231,7 @@ public class Teleop extends LinearOpMode {
                 //incrementing currentLiftLevel
                 if (robot.currentLiftLevel < robot.liftLevels.length - 1) {
                     robot.currentLiftLevel++;
-                    moveLiftNonBlocking(robot.liftLevels[robot.currentLiftLevel], 0.5f);
+                    moveLiftNonBlocking(robot.liftLevels[robot.currentLiftLevel], liftButtonSpeed);
                 }
             }
 
@@ -188,6 +281,7 @@ public class Teleop extends LinearOpMode {
         
                 // push telemetry update
                 telemetry.update();
+
             }
        }
    }
