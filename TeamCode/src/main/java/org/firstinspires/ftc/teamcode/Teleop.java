@@ -47,7 +47,7 @@ public class Teleop extends LinearOpMode {
         // setup lift motor
         robot.liftMotor.setDirection(DcMotor.Direction.REVERSE);
         robot.liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.liftMotor.setMode(DcMotor.RunMode.RUN_ENCODER);
+        robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // setup gamepad extension class
         GamepadEx myGamepad2 = new GamepadEx(gamepad2);
@@ -98,29 +98,29 @@ public class Teleop extends LinearOpMode {
             } else {
                 speedFactor = 0.5;
             }
-            topRight.setPower(topRightCorrectedSpeed * speedFactor);
-            bottomRight.setPower(bottomRightCorrectedSpeed * speedFactor);
-            topLeft.setPower(topLeftCorrectedSpeed * speedFactor);
-            bottomLeft.setPower(bottomLeftCorrectedSpeed * speedFactor);
+            robot.topRight.setPower(topRightCorrectedSpeed * speedFactor);
+            robot.bottomRight.setPower(bottomRightCorrectedSpeed * speedFactor);
+            robot.topLeft.setPower(topLeftCorrectedSpeed * speedFactor);
+            robot.bottomLeft.setPower(bottomLeftCorrectedSpeed * speedFactor);
 
 
             // LIFT
             if (robot.liftMotor.isBusy()) { // executing a bumper press
                 // nothing to see here...
                 if (DEBUG) {
-                    telemetry.addData("lift", LiftMotor.getCurrentPosition() * (1.0 / feetToTicks));
+                    telemetry.addData("lift", robot.liftMotor.getCurrentPosition() * (1.0 / robot.feetToTicks));
                 }
             } else { // not currently executing a bumper press
 
                 // put the motor back in to encoder mode that can be controlled by a joystick
-                robot.liftMotor.setMode(DcMotor.RunMode.RUN_WITH_ENCODER);
+                robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 
                 // TODO: software lift limit!!!!!
                 // myGamepad2.isDown(GamepadKeys.Button.B)
                 if (Math.abs(gamepad2RightY) > 0.05) {  // joystick control
-                    liftPower = (gamepad2RightY * 0.2) + Math.copySign(0.5, gamepad2RightY);
+                    liftPower = (gamepad2RightY * 0.2f) + Math.copySign(0.5f, gamepad2RightY);
                 } else {
-                    liftPower = 0.0;
+                    liftPower = 0.0f;
                 }
                 robot.liftMotor.setPower(liftPower);
                 
@@ -128,17 +128,17 @@ public class Teleop extends LinearOpMode {
             // check if gamepad2 LB was pressed, move lift up!
             if (myGamepad2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
                 //decrement currentLiftLevel
-                if (currentLiftLevel > 0) {
-                    currentLiftLevel--;
-                    moveLiftNonBlocking(liftLevels[currentLiftLevel], 0.7f);
+                if (robot.currentLiftLevel > 0) {
+                    robot.currentLiftLevel--;
+                    moveLiftNonBlocking(robot.liftLevels[robot.currentLiftLevel], 0.7f);
                 }
             }
             // check if gamepad2 RB was pressed, move lift down!
             if (myGamepad2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
                 //incrementing currentLiftLevel
-                if (currentLiftLevel < liftLevels.length - 1) {
-                    currentLiftLevel++;
-                    moveLiftNonBlocking(liftLevels[currentLiftLevel], 0.5f);
+                if (robot.currentLiftLevel < robot.liftLevels.length - 1) {
+                    robot.currentLiftLevel++;
+                    moveLiftNonBlocking(robot.liftLevels[robot.currentLiftLevel], 0.5f);
                 }
             }
 
@@ -167,8 +167,8 @@ public class Teleop extends LinearOpMode {
                 telemetry.addData("Green", greenAvg);
                 telemetry.addData("Blue", blueAvg);
                 telemetry.addData("Alpha", alphaAvg);
-                telemetry.addData("encoder-top-right", topRight.getCurrentPosition());
-                telemetry.addData("LiftMotor", LiftMotor.getCurrentPosition());
+                telemetry.addData("encoder-top-right", robot.topRight.getCurrentPosition());
+                telemetry.addData("LiftMotor", robot.liftMotor.getCurrentPosition());
 
                 if (alphaAvg >= 300.0) {
                     // color sensor is valid
@@ -196,7 +196,7 @@ public class Teleop extends LinearOpMode {
     // set lift to target position and then return, do not block in function
     public void moveLiftNonBlocking(double liftlevel, float speed) {
 
-        int tickTarget = (int)(liftlevel * feetToTicks);
+        int tickTarget = (int)(liftlevel * robot.feetToTicks);
         robot.liftMotor.setTargetPosition(tickTarget);
 
         // TODO: do we have to check if the lift is NOT busy here before changing the run mode?

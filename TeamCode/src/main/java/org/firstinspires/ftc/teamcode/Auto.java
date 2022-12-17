@@ -123,7 +123,7 @@ public class Auto extends LinearOpMode {
             robot.clawClose();
 
             //Step3f
-            moveLiftBlocking(robot.groundLiftlevel, liftPower);
+            moveLiftBlocking(robot.groundLiftLevel, liftPower);
 
             //Step4
             robot.driveWithoutEncoder();

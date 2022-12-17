@@ -18,11 +18,12 @@ public class Robot {
     double      ticksToFeet         = 1.0/feetToTicks;
     int         colorSensorSamples  = 5;
     
-    int         coneLiftlevel       = 0.06; // feet
-    int         terminalLiftlevel   = 0.14; // feet
-    int         smallLiftlevel      = 0.86; // feet
-    int         mediumLiftlevel     = 1.34; // feet
-    int         currentLiftlevel    = 0;    // index
+    double         coneLiftlevel       = 0.06; // feet
+    double         groundLiftLevel     = 0.9; //feet
+    double         terminalLiftlevel   = 0.14; // feet
+    double         smallLiftlevel      = 0.86; // feet
+    double         mediumLiftlevel     = 1.34; // feet
+    int         currentLiftLevel    = 0;    // index
     double[]    liftLevels          = {coneLiftlevel, terminalLiftlevel, smallLiftlevel, mediumLiftlevel};
 
     // DRIVETRAIN
