@@ -130,78 +130,78 @@ public class Auto extends LinearOpMode {
             rotateToAngle(135, 0.5);
             robot.driveWithEncoder();
 
-//
-//            rotate(90, 0.5);
-//
-//            // Drive forward at speed 0.1 while alpha is < 200
-//            double speed = 0.3;
-//            while (robot.alphaAverage(robot.colorSensorBack) < 200) {
-//                robot.setDrivePower(speed)
-//            }
-//
-//            // Once alpha >= 200, stop robot
-//            stopMotors();
-//
-//            /* WE ARE AT "c", READ CONE */
-//
-//            // read cone color
-//            double red = robot.redAverage(robot.colorSensorBack);
-//            double green = robot.greenAverage(robot.colorSensorBack);
-//            double blue = robot.blueAverage(robot.colorSensorBack);
-//
-//            // determine the max color value out of r,g,b
-//            double colorMax = Math.max(Math.max(red,green),blue);
-//
-//            // divide each color by max value to normalize
-//            double redNorm = red / colorMax;
-//            double greenNorm = green / colorMax;
-//            double blueNorm = blue / colorMax;
-//
-//            // calculate c which represents the distance from starting point
-//            // to where we detected the cone
-//            double c=topLeft.getCurrentPosition()*(1.0/robot.feetToTicks);
-//
-//            // check which parking zone the cone represents
-//            if (isParking1(redNorm, greenNorm, blueNorm)){
-//                telemetry.addLine("Parking 1");
-//                telemetry.update();
-//
-//                // drive forward at 0.2 speed to position T (relative)
-//                drive("forward",0.4f,T-c);
-//
-//                //At position T turn cw 135 deg
-//                rotate(135, 0.8);
-//
-//                // drive left at 0.4 speed to position S (relative)
-//                drive("left",0.4f,S);
-//
-//                // drive forward at 0.2 speed to position P (relative)
-//                drive("forward",0.3f,P-T);
-//            }
-//            else if (isParking3(redNorm, greenNorm, blueNorm)){
-//                telemetry.addLine("Parking 3");
-//                telemetry.update();
-//
-//                // drive forward at 0.2 speed to position T (relative)
-//                drive("forward",0.4f,T-c);
-//
-//                // drive right at 0.4 speed to position S (relative)
-//                drive("right",0.4f,S);
-//
-//                // drive forward at 0.2 speed to position P (relative)
-//                drive("forward",0.4f,P-T);
-//            }
-//            else {
-//                telemetry.addLine("Parking 2");
-//                telemetry.update();
-//
-//                // drive forward at 0.2 speed to position P (relative)
-//                drive("forward",0.4f,P-c);
-//            }
-//
-//            /* WE ARE AT PARKING POSITION */
-//            telemetry.addLine("WE DID IT!");
-//            telemetry.update();
+
+            rotateToAngle(90, 0.5);
+
+            // Drive forward at speed 0.1 while alpha is < 200
+            double speed = 0.3;
+            while (robot.alphaAverage(robot.colorSensorBack) < 200) {
+                robot.setDrivePower(speed);
+            }
+
+            // Once alpha >= 200, stop robot
+            robot.stopDriveMotors();
+
+            /* WE ARE AT "c", READ CONE */
+
+            // read cone color
+            double red = robot.redAverage(robot.colorSensorBack);
+            double green = robot.greenAverage(robot.colorSensorBack);
+            double blue = robot.blueAverage(robot.colorSensorBack);
+
+            // determine the max color value out of r,g,b
+            double colorMax = Math.max(Math.max(red,green),blue);
+
+            // divide each color by max value to normalize
+            double redNorm = red / colorMax;
+            double greenNorm = green / colorMax;
+            double blueNorm = blue / colorMax;
+
+            // calculate c which represents the distance from starting point
+            // to where we detected the cone
+            double c=robot.topLeft.getCurrentPosition()*(1.0/robot.feetToTicks);
+
+            // check which parking zone the cone represents
+            if (isParking1(redNorm, greenNorm, blueNorm)){
+                telemetry.addLine("Parking 1");
+                telemetry.update();
+
+                // drive forward at 0.2 speed to position T (relative)
+                driveToPosition("forward",0.4f,distanceToParkingZone-c);
+
+                //At position T turn cw 135 deg
+                rotateToAngle(135, 0.8);
+
+                // drive left at 0.4 speed to position S (relative)
+                driveToPosition("left",0.4f,distanceSidewaysToParking);
+
+                // drive forward at 0.2 speed to position P (relative)
+                driveToPosition("forward",0.3f,distanceToParkingZone-c);
+            }
+            else if (isParking3(redNorm, greenNorm, blueNorm)){
+                telemetry.addLine("Parking 3");
+                telemetry.update();
+
+                // drive forward at 0.2 speed to position T (relative)
+                driveToPosition("forward",0.4f,distanceToCone-c);
+
+                // drive right at 0.4 speed to position S (relative)
+                driveToPosition("right",0.4f,distanceSidewaysToParking);
+
+                // drive forward at 0.2 speed to position P (relative)
+                driveToPosition("forward",0.4f,distanceToParkingZone-c);
+            }
+            else {
+                telemetry.addLine("Parking 2");
+                telemetry.update();
+
+                // drive forward at 0.2 speed to position P (relative)
+                driveToPosition("forward",0.4f,distanceToParkingZone-c);
+            }
+
+            /* WE ARE AT PARKING POSITION */
+            telemetry.addLine("WE DID IT!");
+            telemetry.update();
         }
     }
 
