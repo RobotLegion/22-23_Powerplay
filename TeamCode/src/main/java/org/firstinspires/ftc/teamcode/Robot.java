@@ -12,34 +12,34 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class Robot {
 
     // CONFIGURATION
-    double      clawOpenPosition    = 0.2;
-    double      clawClosePosition   = 0.55;
-    double      feetToTicks         = (19.2*28.0*304.8) / (Math.PI*96.0);
-    double      ticksToFeet         = 1.0/feetToTicks;
-    int         colorSensorSamples  = 5;
-    
-    double         coneLiftlevel       = 0.06; // feet
-    double         groundLiftLevel     = 0.9; //feet
-    double         terminalLiftlevel   = 0.14; // feet
-    double         smallLiftlevel      = 0.86; // feet
-    double         mediumLiftlevel     = 1.34; // feet
-    int         currentLiftLevel    = 0;    // index
-    double[]    liftLevels          = {coneLiftlevel, terminalLiftlevel, smallLiftlevel, mediumLiftlevel};
+    double clawOpenPosition = 0.2;
+    double clawClosePosition = 0.55;
+    double feetToTicks = (19.2 * 28.0 * 304.8) / (Math.PI * 96.0);
+    double ticksToFeet = 1.0 / feetToTicks;
+    int colorSensorSamples = 5;
+
+    double coneLiftlevel = 0.06; // feet
+    double groundLiftLevel = 0.9; //feet
+    double terminalLiftlevel = 0.14; // feet
+    double smallLiftlevel = 0.86; // feet
+    double mediumLiftlevel = 1.34; // feet
+    int currentLiftLevel = 0;    // index
+    double[] liftLevels = {coneLiftlevel, terminalLiftlevel, smallLiftlevel, mediumLiftlevel};
 
     // DRIVETRAIN
-    DcMotor     topRight;
-    DcMotor     bottomRight;
-    DcMotor     topLeft;
-    DcMotor     bottomLeft;
+    DcMotor topRight;
+    DcMotor bottomRight;
+    DcMotor topLeft;
+    DcMotor bottomLeft;
 
     // CLAW
-    Servo       clawServo;
+    Servo clawServo;
 
     // LIFT
-    DcMotor     liftMotor;
+    DcMotor liftMotor;
 
     // SENSORS
-    BNO055IMU   imu;
+    BNO055IMU imu;
     ColorSensor colorSensorBack;
 
     // initalize the robot hardware
@@ -49,29 +49,29 @@ public class Robot {
         // TODO: create new robot configuration with new names!
 
         // initalize drive train
-        topRight        = hardwareMap.dcMotor.get("topRight");                  // control hub port 0
-        bottomRight     = hardwareMap.dcMotor.get("bottomRight");               // control hub port 1
-        topLeft         = hardwareMap.dcMotor.get("topLeft");                   // control hub port 2
-        bottomLeft      = hardwareMap.dcMotor.get("bottomLeft");                // control hub port 3
-        
+        topRight = hardwareMap.dcMotor.get("topRight");                  // control hub port 0
+        bottomRight = hardwareMap.dcMotor.get("bottomRight");               // control hub port 1
+        topLeft = hardwareMap.dcMotor.get("topLeft");                   // control hub port 2
+        bottomLeft = hardwareMap.dcMotor.get("bottomLeft");                // control hub port 3
+
         // initalize claw
-        clawServo       = hardwareMap.servo.get("clawServo");                        // expansion hub port 0
+        clawServo = hardwareMap.servo.get("clawServo");                        // expansion hub port 0
         clawServo.scaleRange(clawOpenPosition, clawClosePosition);
 
         // initalize lift
-        liftMotor       = hardwareMap.dcMotor.get("liftMotor");                 // expansion hub port 0
+        liftMotor = hardwareMap.dcMotor.get("liftMotor");                 // expansion hub port 0
 
         // initalize sensors
-        imu             = hardwareMap.get(BNO055IMU.class, "imu");
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
         colorSensorBack = hardwareMap.get(ColorSensor.class, "colorSensorBack");// port ??
-        
+
 
         // setup IMU
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode                 = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit            = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit            = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.loggingEnabled       = false;
+        parameters.mode = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled = false;
         imu.initialize(parameters);
 
         // while (!isStopRequested() && !imu.isGyroCalibrated()) {
@@ -81,9 +81,10 @@ public class Robot {
     }
 
     // DRIVETRAIN FUNCTIONS
-    public void stopDriveMotors(){
+    public void stopDriveMotors() {
         setDrivePower(0);
     }
+
     // NOTE: direction is set by signs given to "setTargetPosition"
     public void setDrivePower(double speed) {
         topRight.setPower(speed);
@@ -91,24 +92,28 @@ public class Robot {
         topLeft.setPower(speed);
         bottomLeft.setPower(speed);
     }
+
     public void driveWithoutEncoder() {
         topLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         topRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bottomLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bottomRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+
     public void driveWithEncoder() {
         topLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         topRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         bottomLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         bottomRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
+
     public void driveStopAndReset() {
         topLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         topRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bottomLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bottomRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
+
     public void driveRunToPosition() {
         topLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         topRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -140,7 +145,7 @@ public class Robot {
         }
 
         // return the average red value (redSum divided by the number of samples we take)
-        return (double)redSum / (double)colorSensorSamples;
+        return (double) redSum / (double) colorSensorSamples;
     }
 
     // return an average blue value
@@ -156,7 +161,7 @@ public class Robot {
         }
 
         // return the average blue value (blueSum divided by the number of samples we take)
-        return (double)blueSum / (double)colorSensorSamples;
+        return (double) blueSum / (double) colorSensorSamples;
     }
 
     // return an average green value
@@ -172,7 +177,7 @@ public class Robot {
         }
 
         // return the average green value (greenSum divided by the number of samples we take)
-        return (double)greenSum / (double)colorSensorSamples;
+        return (double) greenSum / (double) colorSensorSamples;
     }
 
     // returns an average alpha value
@@ -188,6 +193,7 @@ public class Robot {
         }
 
         // return the average alpha value (alphaSum divided by the number of samples we take)
-        return (double)alphaSum / (double)colorSensorSamples;
+        return (double) alphaSum / (double) colorSensorSamples;
     }
+
 }

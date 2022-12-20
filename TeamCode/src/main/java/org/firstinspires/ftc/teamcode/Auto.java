@@ -24,7 +24,7 @@ public class Auto extends LinearOpMode {
 
     // CONFIGURATION
     // target positions on playing field
-    double distanceToJunction           = 0.4;          // feet
+    double distanceToJunction           = 0.3;          // feet
     double distanceToRotate             = 0.7;          // feet
     // T=position from starting point to where we need to strafe for parking 1/3 (in feet)
     double distanceToCone               = 26.5/12.0;    // feet
@@ -37,7 +37,7 @@ public class Auto extends LinearOpMode {
     float rotateSpeed                   = 0.4f;
 
     // lift
-    float liftPower                     = 0.5f;         // 0-1
+    float liftPower                     = 0.8f;         // 0-1
 
 
     // instantiate a robot class
@@ -111,10 +111,11 @@ public class Auto extends LinearOpMode {
 
 
             //Step3a
-            driveToPosition("forward", 0.3f, distanceToJunction);
+//            moveLiftBlocking(robot.smallLiftlevel, liftPower);
+
 
             //Step3b
-            moveLiftBlocking(robot.smallLiftlevel, liftPower);
+            driveToPosition("forward", 0.3f, distanceToJunction);
 
             //Step3c
             robot.clawOpen();
@@ -126,16 +127,24 @@ public class Auto extends LinearOpMode {
             robot.clawClose();
 
             //Step3f
-            moveLiftBlocking(robot.groundLiftLevel, liftPower);
+//            moveLiftBlocking(robot.groundLiftLevel, liftPower);
 
             //Step4
             robot.driveWithoutEncoder();
-            rotateToAngle(135, rotateSpeed);
+            rotateToAngle(120, rotateSpeed);
+
+            robot.driveStopAndReset();
             robot.driveWithEncoder();
 
             // Drive forward at speed 0.1 while alpha is < 200
+            //TODO Max drive distance
+            //TODO Not working neg numbers
             double speed = -0.3;
-            while (robot.alphaAverage(robot.colorSensorBack) < 200) {
+            double distanceDriven = 0.0;
+            while ((robot.alphaAverage(robot.colorSensorBack) < 200) || (distanceDriven < distanceToParkingZone)) {
+                distanceDriven = robot.topLeft.getCurrentPosition() * robot.ticksToFeet;
+                telemetry.addData("distance", distanceDriven);
+                telemetry.update();
                 robot.setDrivePower(speed);
             }
 
