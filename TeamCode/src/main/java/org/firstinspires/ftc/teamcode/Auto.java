@@ -132,17 +132,13 @@ public class Auto extends LinearOpMode {
             //Step4
             robot.driveWithoutEncoder();
             rotateToAngle(120, rotateSpeed);
-
             robot.driveStopAndReset();
             robot.driveWithEncoder();
 
-            // Drive forward at speed 0.1 while alpha is < 200
-            //TODO Max drive distance
-            //TODO Not working neg numbers
             double speed = -0.3;
             double distanceDriven = 0.0;
             while ((robot.alphaAverage(robot.colorSensorBack) < 200) || (distanceDriven < distanceToParkingZone)) {
-                distanceDriven = robot.topLeft.getCurrentPosition() * robot.ticksToFeet;
+                distanceDriven = Math.abs(robot.topLeft.getCurrentPosition())  * robot.ticksToFeet;
                 telemetry.addData("distance", distanceDriven);
                 telemetry.update();
                 robot.setDrivePower(speed);
@@ -166,8 +162,7 @@ public class Auto extends LinearOpMode {
             double greenNorm = green / colorMax;
             double blueNorm = blue / colorMax;
 
-            // calculate c which represents the distance from starting point
-            // to where we detected the cone
+            // calculate c which represents the distance from starting point to where we detected the cone
             double c=robot.topLeft.getCurrentPosition()*(1.0/robot.feetToTicks);
 
             // check which parking zone the cone represents
@@ -176,13 +171,10 @@ public class Auto extends LinearOpMode {
                 telemetry.update();
 
                 // drive forward at 0.2 speed to position T (relative)
-                driveToPosition("backward",0.4f,distanceToParkingZone-c);
-
-                //At position T turn cw 135 deg
-           //     rotateToAngle(135, rotateSpeed);
+                driveToPosition("backward",0.3f,distanceToParkingZone-c);
 
                 // drive left at 0.4 speed to position S (relative)
-                driveToPosition("right",0.4f,distanceSidewaysToParking);
+                driveToPosition("right",0.3f,distanceSidewaysToParking);
 
                 // drive forward at 0.2 speed to position P (relative)
                 driveToPosition("backward",0.3f,distanceToParkingZone-c);
@@ -192,20 +184,20 @@ public class Auto extends LinearOpMode {
                 telemetry.update();
 
                 // drive forward at 0.2 speed to position T (relative)
-                driveToPosition("backward",0.4f,distanceToCone-c);
+                driveToPosition("backward",0.3f,distanceToParkingZone-c);
 
                 // drive right at 0.4 speed to position S (relative)
-                driveToPosition("left",0.4f,distanceSidewaysToParking);
+                driveToPosition("left",0.3f,distanceSidewaysToParking);
 
                 // drive forward at 0.2 speed to position P (relative)
-                driveToPosition("backward",0.4f,distanceToParkingZone-c);
+                driveToPosition("backward",0.3f,distanceToParkingZone-c);
             }
             else {
                 telemetry.addLine("Parking 2");
                 telemetry.update();
 
                 // drive forward at 0.2 speed to position P (relative)
-                driveToPosition("backward",0.4f,distanceToParkingZone-c);
+                driveToPosition("backward",0.3f,distanceToParkingZone-c);
             }
 
             /* WE ARE AT PARKING POSITION */
@@ -258,7 +250,7 @@ public class Auto extends LinearOpMode {
             rightPower = power;
         } else {                    // do not rotate at all
             return;
-        };
+        }
 
         // set power to rotate.
         robot.topRight.setPower(rightPower);

@@ -27,7 +27,7 @@ public class Teleop extends LinearOpMode {
     double speed            = 1.0;
     double speedFactor;
     float  liftPower        = 0.0f;
-    float  liftButtonSpeed  = 0.75f;
+    float  liftButtonSpeed  = 0.85f;
 
     // STATE
     boolean liftIsMoving    = false;
@@ -149,6 +149,10 @@ public class Teleop extends LinearOpMode {
         // open claw
         robot.clawOpen();
 
+        //Cone lift level
+        //UNTESTED!!!!!!!
+        moveLiftNonBlocking(robot.coneLiftlevel, liftPower);
+
         while (opModeIsActive()) {
 
             // read current gamepad values
@@ -163,9 +167,9 @@ public class Teleop extends LinearOpMode {
 
 
             // CLAW
-            if (myGamepad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
+            if (myGamepad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.05) {
                 robot.clawClose();
-            } else if (myGamepad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.05) {
+            } else if (myGamepad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
                 robot.clawOpen();
             }
 
@@ -180,9 +184,25 @@ public class Teleop extends LinearOpMode {
             double bottomLeftCorrectedSpeed     = Range.clip(Math.pow(bottomRightSpeed, 3), -speed, speed); //Slows down the motor and sets its max/min speed to the double "speed"
             double bottomRightCorrectedSpeed    = Range.clip(Math.pow(bottomLeftSpeed, 3), -speed, speed);  //Slows down the motor and sets its max/min speed to the double "speed"
 
+            //GO FAST
             // speed override, go faster by pressing the right trigger
             if (myGamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
                 speedFactor = 0.8;
+            } else {
+                speedFactor = 0.5;
+            }
+            robot.topRight.setPower(topRightCorrectedSpeed * speedFactor);
+            robot.bottomRight.setPower(bottomRightCorrectedSpeed * speedFactor);
+            robot.topLeft.setPower(topLeftCorrectedSpeed * speedFactor);
+            robot.bottomLeft.setPower(bottomLeftCorrectedSpeed * speedFactor);
+
+
+            //GO SLOW
+            //Newly coded by Micah and not tested yet
+            //Was coded to make it easier to line up with a junction, not sure if this is too slow for the robot to strafe if needed.
+            // speed override, go slower by pressing the left trigger
+            if (myGamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.05) {
+                speedFactor = 0.3;
             } else {
                 speedFactor = 0.5;
             }
@@ -204,6 +224,9 @@ public class Teleop extends LinearOpMode {
                 robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 
                 // TODO: software lift limit!!!!!
+
+
+
                 // myGamepad2.isDown(GamepadKeys.Button.B)
                 if (Math.abs(gamepad2RightY) > 0.05) {  // joystick control
                     if (robot.liftMotor.getCurrentPosition() < robot.liftLevels[robot.liftLevels.length-1] ||
@@ -233,6 +256,9 @@ public class Teleop extends LinearOpMode {
                     robot.currentLiftLevel++;
                     moveLiftNonBlocking(robot.liftLevels[robot.currentLiftLevel], liftButtonSpeed);
                 }
+//                 else if (robot.currentLiftLevel == robot.liftLevels[robot.currentLiftLevel = 3]) {
+//                    robot.liftMotor.setTargetPosition(robot.mediumLiftlevel, liftPower);
+//                }
             }
 
 
@@ -261,7 +287,10 @@ public class Teleop extends LinearOpMode {
                 telemetry.addData("Blue", blueAvg);
                 telemetry.addData("Alpha", alphaAvg);
                 telemetry.addData("encoder-top-right", robot.topRight.getCurrentPosition());
-                telemetry.addData("LiftMotor", robot.liftMotor.getCurrentPosition());
+                telemetry.addData("LiftMotor position", robot.liftMotor.getCurrentPosition()* robot.ticksToFeet);
+                telemetry.addData("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+                telemetry.addData("Is busy?", liftIsMoving);
+
 
                 if (alphaAvg >= 300.0) {
                     // color sensor is valid
@@ -276,7 +305,7 @@ public class Teleop extends LinearOpMode {
                     telemetry.addData("BlueCone", blueConeCheck);
                 } else {
                     // color sensor is not valid
-                    telemetry.addLine("color sensor invaild");
+                    telemetry.addLine("color sensor invalid");
                 }
         
                 // push telemetry update
@@ -284,6 +313,7 @@ public class Teleop extends LinearOpMode {
 
             }
        }
+        robot.stopDriveMotors();
    }
 
     // LIFT FUNCTIONS
@@ -293,14 +323,13 @@ public class Teleop extends LinearOpMode {
         int tickTarget = (int)(liftlevel * robot.feetToTicks);
         robot.liftMotor.setTargetPosition(tickTarget);
 
-        // TODO: do we have to check if the lift is NOT busy here before changing the run mode?
         // tell motors to run to target position
         robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // set speed based on lift power
         robot.liftMotor.setPower(speed);
     }
-
+//TODO make cone lift level at the beginning of teleop --> potentially done
 
     // COLOR SENSOR FUNCTIONS
     //color sensor for seeing red cone, using a range of RGB values focusing on red and green

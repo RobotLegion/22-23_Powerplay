@@ -18,13 +18,13 @@ public class Robot {
     double ticksToFeet = 1.0 / feetToTicks;
     int colorSensorSamples = 5;
 
-    double coneLiftlevel = 0.06; // feet
-    double groundLiftLevel = 0.9; //feet
+    double coneLiftlevel = 0.1; // feet
     double terminalLiftlevel = 0.14; // feet
     double smallLiftlevel = 0.86; // feet
     double mediumLiftlevel = 1.34; // feet
     int currentLiftLevel = 0;    // index
     double[] liftLevels = {coneLiftlevel, terminalLiftlevel, smallLiftlevel, mediumLiftlevel};
+    String[] liftLevelNames = {"coneLiftlevel", "terminalLiftlevel", "smallLiftlevel", "mediumLiftlevel"};
 
     // DRIVETRAIN
     DcMotor topRight;
@@ -46,7 +46,6 @@ public class Robot {
     public void init(HardwareMap hardwareMap) {
 
         // TODO: verify comments are correct ports!
-        // TODO: create new robot configuration with new names!
 
         // initalize drive train
         topRight = hardwareMap.dcMotor.get("topRight");                  // control hub port 0
