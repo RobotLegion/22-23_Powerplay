@@ -18,10 +18,10 @@ public class Robot {
     double ticksToFeet = 1.0 / feetToTicks;
     int colorSensorSamples = 5;
 
-    double coneLiftlevel = 0.1; // feet
-    double terminalLiftlevel = 0.14; // feet
-    double smallLiftlevel = 0.86; // feet
-    double mediumLiftlevel = 1.34; // feet
+    double coneLiftlevel = 0.08; // feet
+    double terminalLiftlevel = 0.11; // feet
+    double smallLiftlevel = 0.83; // feet
+    double mediumLiftlevel = 1.31; // feet
     int currentLiftLevel = 0;    // index
     double[] liftLevels = {coneLiftlevel, terminalLiftlevel, smallLiftlevel, mediumLiftlevel};
     String[] liftLevelNames = {"coneLiftlevel", "terminalLiftlevel", "smallLiftlevel", "mediumLiftlevel"};
@@ -132,7 +132,7 @@ public class Robot {
 
     // COLOR SENSOR FUNCTIONS
     // return an average red value
-    public double redAverage(ColorSensor colorSensor) {
+    public double redAverage(ColorSensor colorSensorBack) {
 
         // initalize redSum to 0
         int redSum = 0;
@@ -140,7 +140,7 @@ public class Robot {
         // run for colorSensorSamples iterations
         for (int i = 0; i < colorSensorSamples; i++) {
             // increment redSum by our new red color sensor reading
-            redSum += colorSensor.red();
+            redSum += colorSensorBack.red();
         }
 
         // return the average red value (redSum divided by the number of samples we take)
@@ -148,7 +148,7 @@ public class Robot {
     }
 
     // return an average blue value
-    public double blueAverage(ColorSensor colorSensor) {
+    public double blueAverage(ColorSensor colorSensorBack) {
 
         // initalize blueSum to 0
         int blueSum = 0;
@@ -156,7 +156,7 @@ public class Robot {
         // run for colorSensorSamples iterations
         for (int i = 0; i < colorSensorSamples; i++) {
             // increment blueSum by our new blue color sensor reading
-            blueSum += colorSensor.blue();
+            blueSum += colorSensorBack.blue();
         }
 
         // return the average blue value (blueSum divided by the number of samples we take)
@@ -164,7 +164,7 @@ public class Robot {
     }
 
     // return an average green value
-    public double greenAverage(ColorSensor colorSensor) {
+    public double greenAverage(ColorSensor colorSensorBack) {
 
         // initalize greenSum to 0
         int greenSum = 0;
@@ -172,7 +172,7 @@ public class Robot {
         // run for colorSensorSamples iterations
         for (int i = 0; i < colorSensorSamples; i++) {
             // increment greenSum by our new green color sensor reading
-            greenSum += colorSensor.green();
+            greenSum += colorSensorBack.green();
         }
 
         // return the average green value (greenSum divided by the number of samples we take)
@@ -180,7 +180,7 @@ public class Robot {
     }
 
     // returns an average alpha value
-    public double alphaAverage(ColorSensor colorSensor) {
+    public double alphaAverage(ColorSensor colorSensorBack) {
 
         // initalize alphaSum to 0
         int alphaSum = 0;
@@ -188,7 +188,7 @@ public class Robot {
         // run for NUM_SAMPLES iterations
         for (int i = 0; i < colorSensorSamples; i++) {
             // increment alphaSum by our new alpha color sensor reading
-            alphaSum += colorSensor.alpha();
+            alphaSum += colorSensorBack.alpha();
         }
 
         // return the average alpha value (alphaSum divided by the number of samples we take)

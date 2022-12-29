@@ -6,6 +6,7 @@ In our teleop mode we have basic driving, intake controls, and lift controls.
 
 ###Autonomous
 In autonomous mode the robot scores 1 cone on a medium junction and then parks in the correct parking zone with the custom signal.
+We are using an IMU to detect how much we rotate. The robot also uses functions we made that tell it to open or close the claw. The robot
 
 ###Drive Teleop
 Our drive is with Mecanum wheels which means it can strafe as well as move forward, backward, and rotate.

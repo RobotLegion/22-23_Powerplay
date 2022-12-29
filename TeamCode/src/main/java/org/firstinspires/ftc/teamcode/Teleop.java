@@ -26,7 +26,7 @@ public class Teleop extends LinearOpMode {
     boolean DEBUG           = true;
     double speed            = 1.0;
     double speedFactor;
-    float  liftPower        = 0.0f;
+    float  liftPower        = 0.6f;
     float  liftButtonSpeed  = 0.85f;
 
     // STATE
@@ -329,7 +329,7 @@ public class Teleop extends LinearOpMode {
         // set speed based on lift power
         robot.liftMotor.setPower(speed);
     }
-//TODO make cone lift level at the beginning of teleop --> potentially done
+//TODO make cone lift level at the beginning of teleop --> done
 
     // COLOR SENSOR FUNCTIONS
     //color sensor for seeing red cone, using a range of RGB values focusing on red and green

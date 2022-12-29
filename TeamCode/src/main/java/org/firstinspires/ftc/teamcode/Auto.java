@@ -99,53 +99,82 @@ public class Auto extends LinearOpMode {
 
 
             //Step 1
+//            telemetry.addData("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+//            moveLiftBlocking(robot.coneLiftlevel, 0.8f);
+            robot.clawOpen();
             robot.clawClose();
 
-            //Test before rotating so the robot doesn't hit the wall.
-            driveToPosition("left", 0.6f, distanceToRotate);
-
-            //Step 2
+//            //Test before rotating so the robot doesn't hit the wall.
+            driveToPosition("left", 0.8f, distanceToRotate);
+//
+////            //Step 2
             robot.driveWithoutEncoder();
             rotateToAngle(135, rotateSpeed);
             robot.driveWithEncoder();
-
-
-            //Step3a
-//            moveLiftBlocking(robot.smallLiftlevel, liftPower);
-
-
-            //Step3b
+//
+////
+////            //Step3a
+//          // moveLiftBlocking(robot.smallLiftlevel, liftPower);
+////
+////
+////            //Step3b
             driveToPosition("forward", 0.3f, distanceToJunction);
-
-            //Step3c
+//
+////            //Step3c
             robot.clawOpen();
-
-            //Step3d
-            driveToPosition("backward", 0.1f, distanceToJunction);
-
-            //Step3e
+////
+////            //Step3d
+          driveToPosition("backward", 0.1f, distanceToJunction);
+//
+////            //Step3e
             robot.clawClose();
-
-            //Step3f
-//            moveLiftBlocking(robot.groundLiftLevel, liftPower);
-
-            //Step4
+////
+////            //Step3f
+//         //  moveLiftBlocking(robot.coneLiftlevel, liftPower);
+////
+////            //Step4
             robot.driveWithoutEncoder();
             rotateToAngle(120, rotateSpeed);
             robot.driveStopAndReset();
             robot.driveWithEncoder();
 
-            double speed = -0.3;
-            double distanceDriven = 0.0;
-            while ((robot.alphaAverage(robot.colorSensorBack) < 200) || (distanceDriven < distanceToParkingZone)) {
-                distanceDriven = Math.abs(robot.topLeft.getCurrentPosition())  * robot.ticksToFeet;
-                telemetry.addData("distance", distanceDriven);
+            telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
+            telemetry.update();
+
+             //Written by Micah because our old code (commented below) did not work
+            //IT WORKS!!!
+            while(robot.alphaAverage (robot.colorSensorBack) < 200) {
+                telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
                 telemetry.update();
-                robot.setDrivePower(speed);
+                driveToPosition("backward", 0.3f, distanceToCone);
+                robot.stopDriveMotors();
             }
 
-            // Once alpha >= 200, stop robot
-            robot.stopDriveMotors();
+            while (robot.alphaAverage (robot.colorSensorBack) > 200){
+                telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
+                telemetry.update();
+                robot.stopDriveMotors();
+            }
+
+//            double speed = -0.3;
+//            double distanceDriven = Math.abs(robot.topLeft.getCurrentPosition())    * robot.ticksToFeet;
+//            telemetry.addData("distance", distanceDriven);
+//
+////            while ((robot.alphaAverage(robot.colorSensorBack) < 200) || (distanceDriven < distanceToParkingZone)) {
+////                distanceDriven = Math.abs(robot.topLeft.getCurrentPosition())  * robot.ticksToFeet;
+////                telemetry.addData("distance", distanceDriven);
+////                telemetry.update();
+////                robot.setDrivePower(speed);
+////            }
+//            if ((robot.alphaAverage(robot.colorSensorBack) < 200) || (distanceDriven < distanceToParkingZone)) {
+//                telemetry.addData("distance", distanceDriven);
+//                telemetry.update();
+//                robot.setDrivePower(speed);
+//            } else {
+//                robot.stopDriveMotors();
+//            }
+//            // Once alpha >= 200, stop robot
+//            robot.stopDriveMotors();
 
             /* WE ARE AT "c", READ CONE */
 
@@ -280,6 +309,7 @@ public class Auto extends LinearOpMode {
 
     // LIFT FUNCTIONS
     // move lift to liftLevel (double) at speed
+    //TODO LIFT FUNCTION NOT WORKING!!!!!!!!
     public void moveLiftBlocking(double liftlevel, float speed){
 
         int tickTarget = (int)(liftlevel * robot.feetToTicks);
@@ -356,6 +386,7 @@ public class Auto extends LinearOpMode {
             telemetry.addData("top right", robot.topRight.getCurrentPosition()*(1.0/robot.feetToTicks));
             telemetry.addData("bottom left", robot.bottomLeft.getCurrentPosition()*(1.0/robot.feetToTicks));
             telemetry.addData("bottom right", robot.bottomRight.getCurrentPosition()*(1.0/robot.feetToTicks));
+            telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
             telemetry.update();
         }
 
