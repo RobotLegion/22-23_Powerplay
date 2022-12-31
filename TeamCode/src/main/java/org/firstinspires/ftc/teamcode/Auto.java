@@ -24,20 +24,25 @@ public class Auto extends LinearOpMode {
 
     // CONFIGURATION
     // target positions on playing field
-    double distanceToJunction           = 0.3;          // feet
-    double distanceToRotate             = 0.7;          // feet
+    double distanceToJunction = 0.2;          // feet
+    double distanceToRotate = 0.7;          // feet
     // T=position from starting point to where we need to strafe for parking 1/3 (in feet)
-    double distanceToCone               = 26.5/12.0;    // feet
+    double distanceToStrafe = 23 / 12.0;    // feet
     // S=position from T to left or right for parking 1/3 (in feet)
-    double distanceSidewaysToParking    = 25.0/12.0;    // feet
+    double distanceSidewaysToParking = 25.0 / 12.0;    // feet
     // P=position from starting point to parking position for 1/2/3 (in feet)
-    double distanceToParkingZone        = 38.0/12.0;    // feet
+    double distanceToParkingZone = 38.0 / 12.0;    // feet
     //R=position where the robot can rotate at the beginning of the match to score.
 
-    float rotateSpeed                   = 0.4f;
+    //Same variables from Robot, but they are negative. Using the Robot variables for lift levels, the lift tried to go down??? This fixed it.
+    double coneLiftlevel = -0.06; // feet
+    double smallLiftlevel = -0.83; // feet
+    double ground = 0.0; //feet
+
+    float rotateSpeed = 0.4f;
 
     // lift
-    float liftPower                     = 0.8f;         // 0-1
+    float liftPower = 0.8f;         // 0-1
 
 
     // instantiate a robot class
@@ -45,8 +50,8 @@ public class Auto extends LinearOpMode {
 
     // setup imu angles
 //    Orientation angles      = new Orientation();
-    Orientation lastAngles  = new Orientation();
-    double      globalAngle = 0.0;
+    Orientation lastAngles = new Orientation();
+    double globalAngle = 0.0;
 
 
     public void runOpMode() {
@@ -88,73 +93,95 @@ public class Auto extends LinearOpMode {
             //Step 1= close claw
             //Step 2= rotate counter clockwise 135 deg
             //Step 3 = score
-                //Step 3a= drive to junction
-                //Step 3b= lift up to small position
-                //Step 3c= open claw
-                //Step 3d = backup
-                //Step 3e= close claw
-                //Step 3f= lower lift
+            //Step 3a= drive to junction
+            //Step 3b= lift up to small position
+            //Step 3c= open claw
+            //Step 3d = backup
+            //Step 3e= close claw
+            //Step 3f= lower lift
             //Step 4= rotate 135 so the back of the robot faces the signal cone.
             //Step 5= Basic Auto
 
 
             //Step 1
-//            telemetry.addData("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
-//            moveLiftBlocking(robot.coneLiftlevel, 0.8f);
-            robot.clawOpen();
+            telemetry.addData("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+            telemetry.update();
+            moveLiftBlocking(coneLiftlevel, liftPower);
+            robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             robot.clawClose();
-
-//            //Test before rotating so the robot doesn't hit the wall.
             driveToPosition("left", 0.8f, distanceToRotate);
-//
-////            //Step 2
+            telemetry.addLine("Step1");
+            telemetry.update();
+
+
+            //Step 2
             robot.driveWithoutEncoder();
             rotateToAngle(135, rotateSpeed);
             robot.driveWithEncoder();
-//
-////
-////            //Step3a
-//          // moveLiftBlocking(robot.smallLiftlevel, liftPower);
-////
-////
-////            //Step3b
+            telemetry.addLine("Step2");
+            telemetry.update();
+
+
+            //Step3a
+            moveLiftBlocking(smallLiftlevel, liftPower);
+            robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            telemetry.addData("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+            telemetry.addLine("Step3");
+            telemetry.update();
+
+
+            //Step3b
             driveToPosition("forward", 0.3f, distanceToJunction);
-//
-////            //Step3c
+            telemetry.addLine("Step3b");
+            telemetry.update();
+
+            //Step3c
             robot.clawOpen();
-////
-////            //Step3d
-          driveToPosition("backward", 0.1f, distanceToJunction);
-//
-////            //Step3e
+            telemetry.addLine("Step3c");
+            telemetry.update();
+
+            //Step3d
+            driveToPosition("backward", 0.1f, distanceToJunction);
+            telemetry.addLine("Step3d");
+            telemetry.update();
+
+            //Step3e
             robot.clawClose();
-////
-////            //Step3f
-//         //  moveLiftBlocking(robot.coneLiftlevel, liftPower);
-////
-////            //Step4
+            telemetry.addLine("Step3e");
+            telemetry.update();
+
+            //Step3f
+
+            moveLiftBlocking(coneLiftlevel, liftPower);
+            telemetry.addData("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+            telemetry.addLine("Step3f");
+            telemetry.update();
+
+            //Step4
             robot.driveWithoutEncoder();
-            rotateToAngle(120, rotateSpeed);
+            rotateToAngle(113, rotateSpeed);
             robot.driveStopAndReset();
             robot.driveWithEncoder();
-
+            telemetry.addLine("Step4");
+            telemetry.addData("red", robot.redAverage(robot.colorSensorBack));
+            telemetry.addData("green", robot.greenAverage(robot.colorSensorBack));
+            telemetry.addData("blue", robot.blueAverage(robot.colorSensorBack));
             telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
             telemetry.update();
 
-             //Written by Micah because our old code (commented below) did not work
-            //IT WORKS!!!
-            while(robot.alphaAverage (robot.colorSensorBack) < 200) {
-                telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
-                telemetry.update();
-                driveToPosition("backward", 0.3f, distanceToCone);
-                robot.stopDriveMotors();
-            }
 
-            while (robot.alphaAverage (robot.colorSensorBack) > 200){
-                telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
-                telemetry.update();
-                robot.stopDriveMotors();
-            }
+            // calculate c which represents the distance from starting point to where we detected the cone
+            double c = robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks);
+
+            driveToPosition("backward", 0.3f, c);
+            robot.stopDriveMotors();
+
+//            while (robot.alphaAverage(robot.colorSensorBack) > 200) {
+//                telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
+//                telemetry.update();
+//                robot.stopDriveMotors();
+//            }
+
 
 //            double speed = -0.3;
 //            double distanceDriven = Math.abs(robot.topLeft.getCurrentPosition())    * robot.ticksToFeet;
@@ -184,55 +211,72 @@ public class Auto extends LinearOpMode {
             double blue = robot.blueAverage(robot.colorSensorBack);
 
             // determine the max color value out of r,g,b
-            double colorMax = Math.max(Math.max(red,green),blue);
+            double colorMax = Math.max(Math.max(red, green), blue);
 
             // divide each color by max value to normalize
             double redNorm = red / colorMax;
             double greenNorm = green / colorMax;
             double blueNorm = blue / colorMax;
 
-            // calculate c which represents the distance from starting point to where we detected the cone
-            double c=robot.topLeft.getCurrentPosition()*(1.0/robot.feetToTicks);
-
             // check which parking zone the cone represents
-            if (isParking1(redNorm, greenNorm, blueNorm)){
+            if (isParking1(redNorm, greenNorm, blueNorm)) {
                 telemetry.addLine("Parking 1");
                 telemetry.update();
 
                 // drive forward at 0.2 speed to position T (relative)
-                driveToPosition("backward",0.3f,distanceToParkingZone-c);
+                driveToPosition("backward", 0.2f, distanceToStrafe - c);
 
                 // drive left at 0.4 speed to position S (relative)
-                driveToPosition("right",0.3f,distanceSidewaysToParking);
+                driveToPosition("right", 0.6f, distanceSidewaysToParking);
 
                 // drive forward at 0.2 speed to position P (relative)
-                driveToPosition("backward",0.3f,distanceToParkingZone-c);
-            }
-            else if (isParking3(redNorm, greenNorm, blueNorm)){
+                driveToPosition("backward", 0.2f, distanceToParkingZone - distanceToStrafe);
+
+                //set to ground for teleop
+                moveLiftBlocking(ground, liftPower);
+                robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            } else if (isParking3(redNorm, greenNorm, blueNorm)) {
                 telemetry.addLine("Parking 3");
                 telemetry.update();
 
                 // drive forward at 0.2 speed to position T (relative)
-                driveToPosition("backward",0.3f,distanceToParkingZone-c);
+                driveToPosition("backward", 0.2f, distanceToStrafe - c);
 
                 // drive right at 0.4 speed to position S (relative)
-                driveToPosition("left",0.3f,distanceSidewaysToParking);
+                driveToPosition("left", 0.6f, distanceSidewaysToParking);
 
                 // drive forward at 0.2 speed to position P (relative)
-                driveToPosition("backward",0.3f,distanceToParkingZone-c);
-            }
-            else {
+                driveToPosition("backward", 0.2f, distanceToParkingZone - distanceToStrafe);
+
+                //set to ground for teleop
+                moveLiftBlocking(ground, liftPower);
+                robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            } else {
                 telemetry.addLine("Parking 2");
                 telemetry.update();
 
                 // drive forward at 0.2 speed to position P (relative)
-                driveToPosition("backward",0.3f,distanceToParkingZone-c);
+                driveToPosition("backward", 0.2f, distanceToParkingZone - c);
+
+                //set to ground for teleop
+                moveLiftBlocking(ground, liftPower);
+                robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
 
             /* WE ARE AT PARKING POSITION */
             telemetry.addLine("WE DID IT!");
             telemetry.update();
         }
+    }
+
+    // stop all the motors
+    public void stopMotors() {
+        robot.topRight.setPower(0);
+        robot.bottomRight.setPower(0);
+        robot.topLeft.setPower(0);
+        robot.bottomLeft.setPower(0);
     }
 
     public void resetAngle(){
@@ -310,25 +354,31 @@ public class Auto extends LinearOpMode {
     // LIFT FUNCTIONS
     // move lift to liftLevel (double) at speed
     //TODO LIFT FUNCTION NOT WORKING!!!!!!!!
-    public void moveLiftBlocking(double liftlevel, float speed){
+    public double moveLiftBlocking(double liftlevel, float speed) {
 
-        int tickTarget = (int)(liftlevel * robot.feetToTicks);
+        int tickTarget = (int) (liftlevel * robot.feetToTicks);
         robot.liftMotor.setTargetPosition(tickTarget);
-
-        // tell motors to run to target position
-        robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // set speed based on lift power
         robot.liftMotor.setPower(speed);
 
+        // tell motors to run to target position
+        robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
         // wait in this loop as long as at least 1 motor is still moving
         // motors report busy until they reach the target position
         while (opModeIsActive() && (robot.liftMotor.isBusy())) {
-            telemetry.addData("lift motor", robot.liftMotor.getCurrentPosition()*(1.0/robot.feetToTicks));
+            telemetry.addData("lift motor", robot.liftMotor.getCurrentPosition() * (1.0 / robot.feetToTicks));
             telemetry.update();
         }
-        robot.liftMotor.setPower(0);
 
+        //Written by Micah because lift would not go up in autonomous.
+        while (!robot.liftMotor.isBusy()) {
+            robot.liftMotor.setPower(0.0f);
+        }
+
+        return liftlevel;
     }
 
     // DRIVE FUNCTIONS
@@ -382,12 +432,15 @@ public class Auto extends LinearOpMode {
         // wait in this loop as long as at least 1 motor is still moving
         // motors report busy until they reach the target position
         while (opModeIsActive() && (robot.bottomRight.isBusy() || robot.topRight.isBusy() || robot.bottomLeft.isBusy() || robot.topLeft.isBusy() )) {
-            telemetry.addData("top left", robot.topLeft.getCurrentPosition()*(1.0/robot.feetToTicks));
-            telemetry.addData("top right", robot.topRight.getCurrentPosition()*(1.0/robot.feetToTicks));
-            telemetry.addData("bottom left", robot.bottomLeft.getCurrentPosition()*(1.0/robot.feetToTicks));
-            telemetry.addData("bottom right", robot.bottomRight.getCurrentPosition()*(1.0/robot.feetToTicks));
-            telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
-            telemetry.update();
+//            telemetry.addData("top left", robot.topLeft.getCurrentPosition()*(1.0/robot.feetToTicks));
+//            telemetry.addData("top right", robot.topRight.getCurrentPosition()*(1.0/robot.feetToTicks));
+//            telemetry.addData("bottom left", robot.bottomLeft.getCurrentPosition()*(1.0/robot.feetToTicks));
+//            telemetry.addData("bottom right", robot.bottomRight.getCurrentPosition()*(1.0/robot.feetToTicks));
+//            telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
+//            telemetry.addData("red", robot.redAverage(robot.colorSensorBack));
+//            telemetry.addData("green", robot.greenAverage(robot.colorSensorBack));
+//            telemetry.addData("blue", robot.blueAverage(robot.colorSensorBack));
+//            telemetry.update();
         }
 
         // stop motors

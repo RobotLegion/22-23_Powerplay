@@ -150,8 +150,7 @@ public class Teleop extends LinearOpMode {
         robot.clawOpen();
 
         //Cone lift level
-        //UNTESTED!!!!!!!
-        moveLiftNonBlocking(robot.coneLiftlevel, liftPower);
+        //moveLiftNonBlocking(robot.coneLiftlevel, liftPower);
 
         while (opModeIsActive()) {
 
