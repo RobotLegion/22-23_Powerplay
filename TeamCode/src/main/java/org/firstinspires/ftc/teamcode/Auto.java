@@ -27,10 +27,10 @@ public class Auto extends LinearOpMode {
     boolean DEBUG = true;
     int DEBUG_MS = 0;
     // target positions on playing field
-    double distanceToJunction = 0.53;          // feet
+    double distanceToJunction = 0.51;          // feet
     double distanceToRotate = 0.4;          // feet
     // T=position from starting point to where we need to strafe for parking 1/3 (in feet)
-    double distanceToStrafe = (30.0 / 12.0) - distanceToRotate;    // feet
+    double distanceToStrafe = (29.7 / 12.0) - distanceToRotate;    // feet
     // S=position from T to left or right for parking 1/3 (in feet)
     double distanceSidewaysToParking = 27.0 / 12.0;    // feet
     // P=position from starting point to parking position for 1/2/3 (in feet)
@@ -121,7 +121,7 @@ public class Auto extends LinearOpMode {
             //Step 2
             robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.driveWithoutEncoder();
-            rotateToAngle(135, rotateSpeed);
+            rotateToAngle(130, rotateSpeed);
             robot.driveWithEncoder();
             telemetry.addLine("Step2");
             telemetry.update();
@@ -167,7 +167,7 @@ public class Auto extends LinearOpMode {
             //Step4
             robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.driveWithoutEncoder();
-            rotateToAngle(113, rotateSpeed);
+            rotateToAngle(124, rotateSpeed);
             robot.driveStopAndReset();
             robot.driveWithEncoder();
             telemetry.addLine("Step4");

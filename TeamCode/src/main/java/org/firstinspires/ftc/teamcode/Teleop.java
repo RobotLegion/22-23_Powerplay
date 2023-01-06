@@ -186,7 +186,7 @@ public class Teleop extends LinearOpMode {
             //GO FAST
             // speed override, go faster by pressing the right trigger
             if (myGamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
-                speedFactor = 0.8;
+                speedFactor = 1.0;
             } else {
                 speedFactor = 0.5;
             }
