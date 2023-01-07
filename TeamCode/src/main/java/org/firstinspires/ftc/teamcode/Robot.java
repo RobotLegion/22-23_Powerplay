@@ -130,6 +130,14 @@ public class Robot {
         clawServo.setPosition(1.0);
     }
 
+    public boolean isClawOpen() {
+        if(clawServo.getPosition() < 0.5) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     // COLOR SENSOR FUNCTIONS
     // return an average red value
     public double redAverage(ColorSensor colorSensorBack) {

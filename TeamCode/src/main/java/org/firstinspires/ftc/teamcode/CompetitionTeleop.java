@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import org.firstinspires.ftc.teamcode.Robot;
-
 //import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 //import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 //import java.util.concurrent.TimeUnit;
@@ -10,17 +8,15 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
+        import com.qualcomm.robotcore.util.Range;
 //import org.firstinspires.ftc.robotcore.external.ClassFactory;
 //import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 //import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.ButtonReader;
 
-@TeleOp(name = "Fy22TeleOp", group = "TeleOp" )
-public class Teleop extends LinearOpMode {
+@TeleOp(name = "CompetitionTeleop", group = "TeleOp" )
+public class CompetitionTeleop extends LinearOpMode {
 
     // CONFIGURATION
     boolean DEBUG           = true;
@@ -166,11 +162,18 @@ public class Teleop extends LinearOpMode {
 
 
             // CLAW
+          //  myGamepad2.stateJustChanged(GamepadKeys.Trigger.LEFT_TRIGGER)
             if (myGamepad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.05) {
-                robot.clawClose();
-            } else if (myGamepad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
-                robot.clawOpen();
+
+                if (robot.isClawOpen()) {
+                    robot.clawClose();
+                } else {
+                    robot.clawOpen();
+                }
             }
+            //else if (myGamepad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
+//                robot.clawOpen();
+//            }
 
             // DRIVETRAIN
             // Mechanum formulas
@@ -186,21 +189,8 @@ public class Teleop extends LinearOpMode {
             //GO FAST
             // speed override, go faster by pressing the right trigger
             if (myGamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
-                speedFactor = 1.0;
-            } else {
-                speedFactor = 0.5;
-            }
-            robot.topRight.setPower(topRightCorrectedSpeed * speedFactor);
-            robot.bottomRight.setPower(bottomRightCorrectedSpeed * speedFactor);
-            robot.topLeft.setPower(topLeftCorrectedSpeed * speedFactor);
-            robot.bottomLeft.setPower(bottomLeftCorrectedSpeed * speedFactor);
-
-
-            //GO SLOW
-            //Newly coded by Micah and not tested yet
-            //Was coded to make it easier to line up with a junction, not sure if this is too slow for the robot to strafe if needed.
-            // speed override, go slower by pressing the left trigger
-            if (myGamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.05) {
+                speedFactor = 0.8;
+            } else if (myGamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.05) {
                 speedFactor = 0.3;
             } else {
                 speedFactor = 0.5;
@@ -209,7 +199,6 @@ public class Teleop extends LinearOpMode {
             robot.bottomRight.setPower(bottomRightCorrectedSpeed * speedFactor);
             robot.topLeft.setPower(topLeftCorrectedSpeed * speedFactor);
             robot.bottomLeft.setPower(bottomLeftCorrectedSpeed * speedFactor);
-
 
             // LIFT
             if (robot.liftMotor.isBusy()) { // executing a bumper press
@@ -260,6 +249,12 @@ public class Teleop extends LinearOpMode {
 //                }
             }
 
+            if (myGamepad2.wasJustPressed(GamepadKeys.Button.B)) {
+                //Button for lift stop and reset
+                robot.liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                //Set liftMotor back into encoder mode
+                robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                }
 
             // COLOR SENSOR
             double redAvg       = robot.redAverage(robot.colorSensorBack);
