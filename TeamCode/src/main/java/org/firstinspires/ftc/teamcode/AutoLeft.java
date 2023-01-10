@@ -3,15 +3,15 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
-@Autonomous(name="AutoLeft", group="Robot")
+@Autonomous(name="AutoRight", group="Robot")
 
 
 public class AutoLeft extends LinearOpMode {
@@ -21,25 +21,27 @@ public class AutoLeft extends LinearOpMode {
     boolean DEBUG = true;
     int DEBUG_MS = 0;
     // target positions on playing field
-    double distanceToJunction = 0.51;          // feet
-    double distanceToRotate = 0.4;          // feet
+    double distanceToJunction = 4.0/12.0;          // feet
+    double distanceToRotate = 0.6;          // feet
     // T=position from starting point to where we need to strafe for parking 1/3 (in feet)
-    double distanceToStrafe = (29.7 / 12.0) - distanceToRotate;    // feet
+    double distanceToStrafe = (32.0 / 12.0) - distanceToRotate;    // feet
     // S=position from T to left or right for parking 1/3 (in feet)
     double distanceSidewaysToParking = 27.0 / 12.0;    // feet
     // P=position from starting point to parking position for 1/2/3 (in feet)
     double distanceToParkingZone = (39.0 / 12.0) - distanceToRotate;    // feet
     //R=position where the robot can rotate at the beginning of the match to score.
 
+    double correctionForConeReading = (1.25/12.0); //feet
+
     //Same variables from Robot, but they are negative. Using the Robot variables for lift levels, the lift tried to go down??? This fixed it.
-    double coneLiftlevel = -0.08; // feet
-    double smallLiftlevel = -0.83; // feet
-    double ground = -0.01; //feet
+    double coneLiftlevel = 0.08; // feet
+    double smallLiftlevel = 0.83; // feet
+    double ground = 0.01; //feet
 
     float rotateSpeed = 0.3f;
 
     // lift
-    float liftPower = 0.9f;         // 0-1
+    float liftPower = 0.8f;         // 0-1
 
 
     // instantiate a robot class
@@ -62,6 +64,10 @@ public class AutoLeft extends LinearOpMode {
         robot.topRight.setDirection(DcMotor.Direction.FORWARD);
         robot.bottomLeft.setDirection(DcMotor.Direction.REVERSE);
         robot.bottomRight.setDirection(DcMotor.Direction.FORWARD);
+
+        robot.liftMotor.setDirection(DcMotor.Direction.REVERSE);
+        // tell lift motor to run with encoder
+        robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Stop motor and reset encoders to 0
         robot.driveStopAndReset();
@@ -101,56 +107,44 @@ public class AutoLeft extends LinearOpMode {
 
 
             //Step 1
-            robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             telemetry.addData("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
             telemetry.update();
             moveLiftBlocking(coneLiftlevel, liftPower);
-            robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             robot.clawClose();
             driveToPosition("left", 0.8f, distanceToRotate);
             telemetry.addLine("Step1");
             telemetry.update();
 
-
             //Step 2
-            robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.driveWithoutEncoder();
-            rotateToAngle(130, rotateSpeed);
+            rotateToAngle(-130, rotateSpeed);
             robot.driveWithEncoder();
             telemetry.addLine("Step2");
             telemetry.update();
 
-
             //Step3a
-            robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             moveLiftBlocking(smallLiftlevel, liftPower);
-            robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             telemetry.addData("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
             telemetry.addLine("Step3");
             telemetry.update();
 
-
             //Step3b
-            robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             driveToPosition("forward", 0.3f, distanceToJunction);
             telemetry.addLine("Step3b");
             telemetry.update();
 
             //Step3c
-            robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.clawOpen();
             telemetry.addLine("Step3c");
             telemetry.update();
 
             //Step3d
-            robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            driveToPosition("backward", 0.1f, distanceToJunction);
+            driveToPosition("backward", 0.3f, distanceToJunction);
             telemetry.addLine("Step3d");
             telemetry.update();
 
             //Step3f
-            robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            moveLiftBlocking(coneLiftlevel, liftPower);
+            moveLiftBlocking(ground, liftPower);
             telemetry.addData("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
             telemetry.addLine("Step3f");
             telemetry.update();
@@ -159,11 +153,11 @@ public class AutoLeft extends LinearOpMode {
             robot.clawOpen();
 
             //Step4
-            robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.driveWithoutEncoder();
-            rotateToAngle(124, rotateSpeed);
+            rotateToAngle(-123, rotateSpeed);
             robot.driveStopAndReset();
             robot.driveWithEncoder();
+            driveToPosition("right", 0.3f, correctionForConeReading);
             telemetry.addLine("Step4");
             telemetry.addData("red", robot.redAverage(robot.colorSensorBack));
             telemetry.addData("green", robot.greenAverage(robot.colorSensorBack));
@@ -171,12 +165,8 @@ public class AutoLeft extends LinearOpMode {
             telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
             telemetry.update();
 
-            //Step 5
-
-
-
             // calculate c which represents the distance from starting point to where we detected the cone
-           // double c = robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks);
+            // double c = robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks);
 
 //            driveToPosition("backward", 0.3f, c);
 //            robot.stopDriveMotors();
@@ -185,11 +175,14 @@ public class AutoLeft extends LinearOpMode {
             robot.driveWithEncoder();
             double speed = -0.1;
 
-            while (robot.alphaAverage(robot.colorSensorBack) < 200) {
+            double distanceDriven = 0.0;
+            while (robot.alphaAverage(robot.colorSensorBack) < 200 && distanceDriven <= distanceToParkingZone) {
+
+                distanceDriven = Math.abs(robot.topLeft.getCurrentPosition()) * robot.ticksToFeet;
 
                 if (DEBUG) {
                     telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
-                    telemetry.addData("c", robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks));
+                    telemetry.addData("distance driven", robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks));
                     telemetry.update();
                 }
                 robot.topLeft.setPower(speed);
@@ -197,10 +190,13 @@ public class AutoLeft extends LinearOpMode {
                 robot.bottomLeft.setPower(speed);
                 robot.bottomRight.setPower(speed);
             }
+
             robot.stopDriveMotors();
 
+            double c= Math.abs(robot.topLeft.getCurrentPosition()*(1.0/robot.feetToTicks));
+
             if (DEBUG) {
-                telemetry.addData("c", robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks));
+                telemetry.addData("c", c);
                 telemetry.update();
             }
 
@@ -240,11 +236,8 @@ public class AutoLeft extends LinearOpMode {
             double greenNorm = green / colorMax;
             double blueNorm = blue / colorMax;
 
-            double c= Math.abs(robot.topLeft.getCurrentPosition()*(1.0/robot.feetToTicks));
-
             // check which parking zone the cone represents
             if (isParking1(redNorm, greenNorm, blueNorm)) {
-                robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 telemetry.addLine("Parking 1");
 
                 if (DEBUG) {
@@ -281,14 +274,7 @@ public class AutoLeft extends LinearOpMode {
                 // drive forward at 0.2 speed to position P (relative)
                 driveToPosition("backward", 0.2f, distanceToParkingZone - distanceToStrafe);
 
-                //set to ground for teleop
-                //TODO Make sure this works!!
-                moveLiftBlocking(ground, liftPower);
-                //robot.liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                //robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
             } else if (isParking3(redNorm, greenNorm, blueNorm)) {
-                robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 telemetry.addLine("Parking 3");
                 telemetry.update();
 
@@ -321,12 +307,7 @@ public class AutoLeft extends LinearOpMode {
                 telemetry.update();
                 driveToPosition("backward", 0.2f, distanceToParkingZone - distanceToStrafe);
 
-                //set to ground for teleop
-                moveLiftBlocking(ground, liftPower);
-                robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
             } else {
-                robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 telemetry.addLine("Parking 2");
                 telemetry.update();
 
@@ -338,9 +319,6 @@ public class AutoLeft extends LinearOpMode {
                 }
                 driveToPosition("backward", 0.2f, distanceToParkingZone - c);
 
-                //set to ground for teleop
-                moveLiftBlocking(ground, liftPower);
-                robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
 
             /* WE ARE AT PARKING POSITION */
@@ -431,30 +409,25 @@ public class AutoLeft extends LinearOpMode {
 
     // LIFT FUNCTIONS
     // move lift to liftLevel (double) at speed
-    //TODO LIFT FUNCTION NOT WORKING!!!!!!!!
     public double moveLiftBlocking(double liftlevel, float speed) {
 
         int tickTarget = (int) (liftlevel * robot.feetToTicks);
-        robot.liftMotor.setTargetPosition(tickTarget);
 
         // set speed based on lift power
-        robot.liftMotor.setPower(speed);
-
-        // tell motors to run to target position
-        robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
+        if (tickTarget > robot.liftMotor.getCurrentPosition()) {
+            robot.liftMotor.setPower(speed);
+        } else {
+            robot.liftMotor.setPower(-speed);
+        }
 
         // wait in this loop as long as at least 1 motor is still moving
         // motors report busy until they reach the target position
-        while (opModeIsActive() && (robot.liftMotor.isBusy())) {
-            telemetry.addData("lift motor", robot.liftMotor.getCurrentPosition() * (1.0 / robot.feetToTicks));
+        while (opModeIsActive() && Math.abs(robot.liftMotor.getCurrentPosition()-tickTarget) > 10) {
+            telemetry.addData("lift motor", Math.abs(robot.liftMotor.getCurrentPosition()-tickTarget));
             telemetry.update();
         }
 
-        //Written by Micah because lift would not go up in autonomous.
-        while (!robot.liftMotor.isBusy()) {
-            robot.liftMotor.setPower(0.0f);
-        }
+        robot.liftMotor.setPower(0.0f);
 
         return liftlevel;
     }

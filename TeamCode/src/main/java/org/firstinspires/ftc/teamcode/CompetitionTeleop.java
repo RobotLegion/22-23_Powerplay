@@ -162,18 +162,12 @@ public class CompetitionTeleop extends LinearOpMode {
 
 
             // CLAW
-          //  myGamepad2.stateJustChanged(GamepadKeys.Trigger.LEFT_TRIGGER)
             if (myGamepad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.05) {
-
-                if (robot.isClawOpen()) {
-                    robot.clawClose();
-                } else {
-                    robot.clawOpen();
-                }
+                robot.clawClose();
             }
-            //else if (myGamepad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
-//                robot.clawOpen();
-//            }
+            else if (myGamepad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
+                robot.clawOpen();
+            }
 
             // DRIVETRAIN
             // Mechanum formulas

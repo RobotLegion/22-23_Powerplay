@@ -31,7 +31,7 @@ public class AutoRight extends LinearOpMode {
     double distanceToParkingZone = (39.0 / 12.0) - distanceToRotate;    // feet
     //R=position where the robot can rotate at the beginning of the match to score.
 
-    double correctionForConeReading = (1.0/12.0); //feet
+    double correctionForConeReading = (1.25/12.0); //feet
 
     //Same variables from Robot, but they are negative. Using the Robot variables for lift levels, the lift tried to go down??? This fixed it.
     double coneLiftlevel = 0.08; // feet
@@ -180,7 +180,7 @@ public class AutoRight extends LinearOpMode {
 
             robot.driveStopAndReset();
             robot.driveWithEncoder();
-            double speed = -0.1;
+            double speed = -0.2;
 
             double distanceDriven = 0.0;
             while (robot.alphaAverage(robot.colorSensorBack) < 200 && distanceDriven <= distanceToParkingZone) {
