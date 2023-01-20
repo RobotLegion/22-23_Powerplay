@@ -21,7 +21,7 @@ public class ColorSensorCalibration extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         // initalize color sensor
-        colorSensorBack = hardwareMap.get(ColorSensor.class, "Color");
+        colorSensorBack = hardwareMap.get(ColorSensor.class, "colorSensorBack");
 
 
         waitForStart();

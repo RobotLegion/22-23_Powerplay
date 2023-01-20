@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.os.Environment;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,6 +11,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 
 @Autonomous(name="AutoRight", group="Robot")
@@ -75,8 +85,9 @@ public class AutoRight extends LinearOpMode {
         // Enables motor encoders to track how much the motors have rotated
         robot.driveWithEncoder();
 
-        telemetry.addLine("Calibrating gyro...");
-        telemetry.update();
+
+        robot.log("Calibrating gyro...");
+
 
         // make sure the imu gyro is calibrated before continuing.
         while (!isStopRequested() && !robot.imu.isGyroCalibrated()) {
@@ -85,8 +96,8 @@ public class AutoRight extends LinearOpMode {
         }
 
         // Wait for start button press on Driver Station
-        telemetry.addLine("Waiting for start...");
-        telemetry.update();
+        robot.log("Waiting for start...");
+
         waitForStart();
 
         // While the mode is active (has not been stopped / time has not expired)
@@ -107,50 +118,39 @@ public class AutoRight extends LinearOpMode {
 
 
             //Step 1
-            telemetry.addData("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
-            telemetry.update();
+            robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
             moveLiftBlocking(coneLiftlevel, liftPower);
             robot.clawClose();
             driveToPosition("right", 0.8f, distanceToRotate);
-            telemetry.addLine("Step1");
-            telemetry.update();
-
+            robot.log("Step1");
 
             //Step 2
             robot.driveWithoutEncoder();
             rotateToAngle(-130, rotateSpeed);
             robot.driveWithEncoder();
-            telemetry.addLine("Step2");
-            telemetry.update();
-
+            robot.log("Step2");
 
             //Step3a
             moveLiftBlocking(smallLiftlevel, liftPower);
-            telemetry.addData("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
-            telemetry.addLine("Step3");
-            telemetry.update();
-
+            robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+            robot.log("Step3");
 
             //Step3b
             driveToPosition("forward", 0.3f, distanceToJunction);
-            telemetry.addLine("Step3b");
-            telemetry.update();
+            robot.log("Step3b");
 
             //Step3c
             robot.clawOpen();
-            telemetry.addLine("Step3c");
-            telemetry.update();
+            robot.log("Step3c");
 
             //Step3d
             driveToPosition("backward", 0.3f, distanceToJunction);
-            telemetry.addLine("Step3d");
-            telemetry.update();
+            robot.log("Step3d");
 
             //Step3f
             moveLiftBlocking(ground, liftPower);
-            telemetry.addData("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
-            telemetry.addLine("Step3f");
-            telemetry.update();
+            robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+            robot.log("Step3f");
 
             //Step 3g
             robot.clawOpen();
@@ -160,27 +160,18 @@ public class AutoRight extends LinearOpMode {
             rotateToAngle(-123, rotateSpeed);
             robot.driveStopAndReset();
             robot.driveWithEncoder();
-            driveToPosition("right", 0.3f, correctionForConeReading);
-            telemetry.addLine("Step4");
-            telemetry.addData("red", robot.redAverage(robot.colorSensorBack));
-            telemetry.addData("green", robot.greenAverage(robot.colorSensorBack));
-            telemetry.addData("blue", robot.blueAverage(robot.colorSensorBack));
-            telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
-            telemetry.update();
-
-            //Step 5
-
-
+            driveToPosition("left", 0.3f, correctionForConeReading);
+            robot.log("Step4");
 
             // calculate c which represents the distance from starting point to where we detected the cone
-           // double c = robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks);
+            // double c = robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks);
 
 //            driveToPosition("backward", 0.3f, c);
 //            robot.stopDriveMotors();
 
             robot.driveStopAndReset();
             robot.driveWithEncoder();
-            double speed = -0.2;
+            double speed = -0.1;
 
             double distanceDriven = 0.0;
             while (robot.alphaAverage(robot.colorSensorBack) < 200 && distanceDriven <= distanceToParkingZone) {
@@ -188,22 +179,21 @@ public class AutoRight extends LinearOpMode {
                 distanceDriven = Math.abs(robot.topLeft.getCurrentPosition()) * robot.ticksToFeet;
 
                 if (DEBUG) {
-                    telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
-                    telemetry.addData("distance driven", robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks));
-                    telemetry.update();
+                    robot.log("distance driven", distanceDriven);
+                    robot.log("alpha", robot.alphaAverage(robot.colorSensorBack));
                 }
                 robot.topLeft.setPower(speed);
                 robot.topRight.setPower(speed);
                 robot.bottomLeft.setPower(speed);
                 robot.bottomRight.setPower(speed);
             }
+
             robot.stopDriveMotors();
 
             double c= Math.abs(robot.topLeft.getCurrentPosition()*(1.0/robot.feetToTicks));
 
             if (DEBUG) {
-                telemetry.addData("c", c);
-                telemetry.update();
+                robot.log("final distance driven", c);
             }
 
 
@@ -242,96 +232,48 @@ public class AutoRight extends LinearOpMode {
             double greenNorm = green / colorMax;
             double blueNorm = blue / colorMax;
 
-
+            robot.log("red", redNorm);
+            robot.log("green", greenNorm);
+            robot.log("blue", blueNorm);
             // check which parking zone the cone represents
             if (isParking1(redNorm, greenNorm, blueNorm)) {
-                telemetry.addLine("Parking 1");
-
-                if (DEBUG) {
-                    telemetry.addData("red", redNorm);
-                    telemetry.addData("green", greenNorm);
-                    telemetry.addData("blue", blueNorm);
-                    telemetry.addData("alpha", robot.alphaAverage(robot.colorSensorBack));
-                    telemetry.update();
-                    sleep(DEBUG_MS);
-                }
-
+                robot.log("Parking 1");
 
                 // drive forward at 0.2 speed to position T (relative)
-                if (DEBUG) {
-                    telemetry.addLine("distanceToStrafe");
-                    telemetry.update();
-                    sleep(DEBUG_MS);
-                }
+
                 driveToPosition("backward", 0.2f, distanceToStrafe - c);
 
-                if (DEBUG) {
-                    telemetry.addLine("distanceSidewaysToParking");
-                    telemetry.update();
-                    sleep(DEBUG_MS);
-                }
                 // drive left at 0.4 speed to position S (relative)
                 driveToPosition("right", 0.6f, distanceSidewaysToParking);
 
-                if (DEBUG) {
-                    telemetry.addLine("distanceToParkingZone");
-                    telemetry.update();
-                    sleep(DEBUG_MS);
-                }
                 // drive forward at 0.2 speed to position P (relative)
                 driveToPosition("backward", 0.2f, distanceToParkingZone - distanceToStrafe);
 
             } else if (isParking3(redNorm, greenNorm, blueNorm)) {
-                telemetry.addLine("Parking 3");
-                telemetry.update();
+                robot.log("Parking 3");
 
                 // drive forward at 0.2 speed to position T (relative)
-                if (DEBUG) {
-                    telemetry.addLine("distanceToStrafe");
-                    telemetry.update();
-                    sleep(DEBUG_MS);
-                }
-
                 driveToPosition("backward", 0.2f, distanceToStrafe - c);
 
                 // drive right at 0.4 speed to position S (relative)
-
-                if (DEBUG) {
-                    telemetry.addLine("distanceSidewaysToParking");
-                    telemetry.update();
-                    sleep(DEBUG_MS);
-                }
-
                 driveToPosition("left", 0.6f, distanceSidewaysToParking);
 
                 // drive forward at 0.2 speed to position P (relative)
-                if (DEBUG) {
-                    telemetry.addLine("distanceToParkingZone");
-                    telemetry.update();
-                    sleep(DEBUG_MS);
-                }
-                telemetry.addLine("distanceToParkingZone");
-                telemetry.update();
                 driveToPosition("backward", 0.2f, distanceToParkingZone - distanceToStrafe);
 
             } else {
-                telemetry.addLine("Parking 2");
-                telemetry.update();
+                robot.log("Parking 2");
 
                 // drive forward at 0.2 speed to position P (relative)
-                if (DEBUG) {
-                    telemetry.addLine("distanceToParkingZone");
-                    telemetry.update();
-                    sleep(DEBUG_MS);
-                }
                 driveToPosition("backward", 0.2f, distanceToParkingZone - c);
 
             }
 
             /* WE ARE AT PARKING POSITION */
-            telemetry.addLine("WE DID IT!");
-            telemetry.update();
+            robot.log("We did it!");
         }
+
+        robot.destroy();
     }
 
     // stop all the motors
@@ -524,12 +466,12 @@ public class AutoRight extends LinearOpMode {
         }
 
         // check if g is in the range
-        if (g >= 0.3 && g <= 1.0) {
+        if (g >= 0.4 && g <= 1.0) {
             greenCheck = true;
         }
 
         // check if b is in the range
-        if (b >= 0.5 && b <= 1.0) {
+        if (b >= 0.6 && b <= 1.0) {
             blueCheck = true;
         }
 
@@ -551,17 +493,17 @@ public class AutoRight extends LinearOpMode {
         boolean blueCheck = false;
 
         // check if r is in the range
-        if (r >= 0.3 && r <= 0.7) {
+        if (r >= 0.4 && r <= 0.6) {
             redCheck = true;
         }
 
         // check if g is in the range
-        if (g >= 0.8 && g <= 1.0 ) {
+        if (g >= 0.7 && g <= 1.0 ) {
             greenCheck = true;
         }
 
         // check if b is in the range
-        if (b >= 0.1 && b <= 0.8) {
+        if (b >= 0.1 && b <= 0.7) {
             blueCheck = true;
         }
 

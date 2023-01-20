@@ -1,11 +1,18 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.os.Environment;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 // import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -22,6 +29,7 @@ public class Robot {
     double terminalLiftlevel = 0.11; // feet
     double smallLiftlevel = 0.83; // feet
     double mediumLiftlevel = 1.31; // feet
+   // double coneStackLevel = //feet
     int currentLiftLevel = 0;    // index
     double[] liftLevels = {coneLiftlevel, terminalLiftlevel, smallLiftlevel, mediumLiftlevel};
     String[] liftLevelNames = {"coneLiftlevel", "terminalLiftlevel", "smallLiftlevel", "mediumLiftlevel"};
@@ -41,6 +49,11 @@ public class Robot {
     // SENSORS
     BNO055IMU imu;
     ColorSensor colorSensorBack;
+    ColorSensor colorSensorLeft;
+    ColorSensor colorSensorRight;
+
+    // File
+    FileWriter f;
 
     // initalize the robot hardware
     public void init(HardwareMap hardwareMap) {
@@ -73,10 +86,58 @@ public class Robot {
         parameters.loggingEnabled = false;
         imu.initialize(parameters);
 
+        // .\adb.exe shell ls /storage/self/primary/FIRST/data
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        SimpleDateFormat sdf1 = new SimpleDateFormat("MM.dd.HH.mm.ss");
+        String logFilePath = String.format("%s/FIRST/data/%s.txt",
+                Environment.getExternalStorageDirectory().getAbsolutePath(),
+                sdf1.format(timestamp));
+
+        try {
+            f = new FileWriter(logFilePath);
+        } catch (IOException e) {
+
+        }
+
         // while (!isStopRequested() && !imu.isGyroCalibrated()) {
         //     sleep(50);
         //     idle();
         // }
+    }
+
+    public void destroy() {
+        try {
+            f.close();
+        } catch (IOException e){
+
+        }
+    }
+
+    public void log(String s) {
+
+        try {
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            SimpleDateFormat sdf1 = new SimpleDateFormat("MM.dd.HH.mm.ss.SSS");
+
+            String logEntry = String.format("%s: %s\n",
+                    sdf1.format(timestamp),
+                    s);
+
+            f.write(logEntry);
+            f.flush();
+        } catch (IOException e) {
+
+        }
+    }
+
+    public void log(String s, double d) {
+        String tmp = String.format("%s %f", s, d);
+        log(tmp);
+    }
+
+    public void log(String s, String s2) {
+        String tmp = String.format("%s %s", s, s2);
+        log(tmp);
     }
 
     // DRIVETRAIN FUNCTIONS
