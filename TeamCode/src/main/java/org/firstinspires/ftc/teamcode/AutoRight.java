@@ -20,10 +20,10 @@ public class AutoRight extends LinearOpMode {
     boolean DEBUG = true;
     int DEBUG_MS = 0;
     // target positions on playing field
-    double distanceToJunction = 4.0 / 12.0;          // feet
+    double distanceToJunction = 5.0 / 12.0;          // feet
     double distanceToRotate = 0.6;          // feet
     // T=position from starting point to where we need to strafe for parking 1/3 (in feet)
-    double distanceToStrafe = (32.0 / 12.0) - distanceToRotate;    // feet
+    double distanceToStrafe = (30.0 / 12.0) - distanceToRotate;    // feet
     // S=position from T to left or right for parking 1/3 (in feet)
     double distanceSidewaysToParking = 27.0 / 12.0;    // feet
     // P=position from starting point to parking position for 1/2/3 (in feet)
@@ -34,7 +34,7 @@ public class AutoRight extends LinearOpMode {
 
     //Same variables from Robot, but they are negative. Using the Robot variables for lift levels, the lift tried to go down??? This fixed it.
     double coneLiftlevel = 0.08; // feet
-    double smallLiftlevel = 0.83; // feet
+    double smallLiftlevel = 0.86; // feet
     double ground = 0.01; //feet
 
     float rotateSpeed = 0.3f;
@@ -114,16 +114,16 @@ public class AutoRight extends LinearOpMode {
             driveToPosition("right", 0.8f, distanceToRotate);
             robot.log("Step1- Close claw and strafe right distanceToRotate");
 
-            //Step 2
-            robot.driveWithoutEncoder();
-            rotateToAngle(-130, rotateSpeed);
-            robot.driveWithEncoder();
-            robot.log("Step2-Rotate clockwise 130 degrees");
-
-            //Step3a
+            //Step2
             moveLiftBlocking(smallLiftlevel, liftPower);
             robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
-            robot.log("Step3-Lift up to smallLiftLevel");
+            robot.log("Step2-Lift up to smallLiftLevel");
+
+            //Step 3a
+            robot.driveWithoutEncoder();
+            rotateToAngle(-123, rotateSpeed);
+            robot.driveWithEncoder();
+            robot.log("Step3a-Rotate clockwise 130 degrees");
 
             //Step3b
             driveToPosition("forward", 0.3f, distanceToJunction);
@@ -137,21 +137,16 @@ public class AutoRight extends LinearOpMode {
             driveToPosition("backward", 0.3f, distanceToJunction);
             robot.log("Step3d-Drive back from junction");
 
-            //Step3f
-            moveLiftBlocking(ground, liftPower);
-            robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
-            robot.log("Step3f-Lift to ground (0 ticks)");
-
             //Step 3g
             robot.clawOpen();
             robot.log("Step3g-Open claw");
 
             //Step4
             robot.driveWithoutEncoder();
-            rotateToAngle(-123, rotateSpeed);
+            rotateToAngle(-128, rotateSpeed);
             robot.driveStopAndReset();
             robot.driveWithEncoder();
-            driveToPosition("left", 0.3f, correctionForConeReading);
+          //  driveToPosition("left", 0.3f, correctionForConeReading);
             robot.log("Step4-Rotate clockwise 123 degrees and then strafe left to correctionForConeReading");
 
             // calculate c which represents the distance from starting point to where we detected the cone
@@ -240,6 +235,12 @@ public class AutoRight extends LinearOpMode {
                 // drive forward at 0.2 speed to position P (relative)
                 driveToPosition("backward", 0.2f, distanceToParkingZone - distanceToStrafe);
 
+                //Step3f
+                moveLiftBlocking(ground, liftPower);
+                robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+                robot.log("Step3f-Lift to ground (0 ticks)");
+
+
             } else if (robot.isParking3(redNorm, greenNorm, blueNorm)) {
                 robot.log("Parking 3");
 
@@ -252,11 +253,21 @@ public class AutoRight extends LinearOpMode {
                 // drive forward at 0.2 speed to position P (relative)
                 driveToPosition("backward", 0.2f, distanceToParkingZone - distanceToStrafe);
 
+                //Step3f
+                moveLiftBlocking(ground, liftPower);
+                robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+                robot.log("Step3f-Lift to ground (0 ticks)");
+
             } else {
                 robot.log("Parking 2");
 
                 // drive forward at 0.2 speed to position P (relative)
                 driveToPosition("backward", 0.2f, distanceToParkingZone - c);
+
+                //Step3f
+                moveLiftBlocking(ground, liftPower);
+                robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+                robot.log("Step3f-Lift to ground (0 ticks)");
 
             }
 

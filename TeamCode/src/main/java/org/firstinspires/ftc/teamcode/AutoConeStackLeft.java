@@ -28,7 +28,7 @@ public class AutoConeStackLeft extends LinearOpMode {
     //R=position where the robot can rotate at the beginning of the match to score.
 
     //Distance to line
-    double distanceToLine = (24.0 / 12.0); //feet
+    double distanceToLine = (32.0 / 12.0); //feet
 
     //Distance to cone stack
     double distanceToConeStack = (12.0 / 12.0); //feet
@@ -37,9 +37,9 @@ public class AutoConeStackLeft extends LinearOpMode {
 
     //Same variables from Robot, but they are negative. Using the Robot variables for lift levels, the lift tried to go down??? This fixed it.
     double coneLiftlevel = 0.08; // feet
-    double smallLiftlevel = 0.83; // feet
+    double smallLiftlevel = 0.86; // feet
     double ground = 0.01; //feet
-    double coneStackLevel = 0.0; //feet
+    double coneStackLevel = 0.35; //feet
 
     float rotateSpeed = 0.3f;
 
@@ -108,16 +108,17 @@ public class AutoConeStackLeft extends LinearOpMode {
             driveToPosition("left", 0.8f, distanceToRotate);
             robot.log("Step1-Close Claw");
 
-            //Step 2
-            robot.driveWithoutEncoder();
-            rotateToAngle(130, rotateSpeed);
-            robot.driveWithEncoder();
-            robot.log("Step2-Rotate counter-clockwise 130 degrees");
-
-            //Step3a
+            //Step2
             moveLiftBlocking(smallLiftlevel, liftPower);
             robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
-            robot.log("Step3-lift up to low junction position");
+            robot.log("Step2-lift up to low junction position");
+
+            //Step 3a
+            robot.driveWithoutEncoder();
+            rotateToAngle(141, rotateSpeed);
+            robot.driveWithEncoder();
+            robot.log("Step3a-Rotate counter-clockwise 130 degrees");
+
 
             //Step3b
             driveToPosition("forward", 0.3f, distanceToJunction);
@@ -131,11 +132,6 @@ public class AutoConeStackLeft extends LinearOpMode {
             driveToPosition("backward", 0.3f, distanceToJunction);
             robot.log("Step3d-Drive back from junction");
 
-            //Step3f
-            moveLiftBlocking(ground, liftPower);
-            robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
-            robot.log("Step3f-Lift down to ground level (0 ticks)");
-
             //Step 3g
             robot.clawOpen();
             robot.log("Step3g-Open claw");
@@ -145,8 +141,13 @@ public class AutoConeStackLeft extends LinearOpMode {
             rotateToAngle(123, rotateSpeed);
             robot.driveStopAndReset();
             robot.driveWithEncoder();
-            driveToPosition("right", 0.3f, correctionForConeReading);
+           // driveToPosition("right", 0.3f, correctionForConeReading);
             robot.log("Step4-Rotate counter clockwise 123 degrees and then strafe right to correctionForConeReading");
+
+            //Step3f
+            moveLiftBlocking(ground, liftPower);
+            robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+            robot.log("Step3f-Lift down to ground level (0 ticks)");
 
             robot.driveStopAndReset();
             robot.driveWithEncoder();
@@ -236,13 +237,17 @@ public class AutoConeStackLeft extends LinearOpMode {
 
             if (robot.isParking1(redNorm, greenNorm, blueNorm)) {
                 robot.log("Parking 1");
+                telemetry.addLine("Parking 1");
+                telemetry.update();
 
                 //Step 4
                 driveToPosition("backward", 0.4f, distanceToLine);
+                telemetry.addLine("Step4-Drive distanceToLine");
+                telemetry.update();
                 robot.log("Step4-Drive to distanceToLine");
 
                 //Step 5
-                rotateToAngle(90, 0.3f);
+                rotateToAngle(90, rotateSpeed);
                 robot.log("Step5-Rotate 90 degrees counter clockwise");
 
                 //Step 6
@@ -266,7 +271,7 @@ public class AutoConeStackLeft extends LinearOpMode {
                 robot.log("Step10-Drive distanceToConeStack backwards");
 
                 //Step 11
-                rotateToAngle(135, 0.4);
+                rotateToAngle(135, rotateSpeed);
                 robot.log("Step11-Rotate 135 degrees counter clockwise.");
 
                 //Step 12
@@ -286,7 +291,7 @@ public class AutoConeStackLeft extends LinearOpMode {
                 robot.log("Step15-Lift to cone stack level");
 
                 //Step 16
-                rotateToAngle(135, 0.4f);
+                rotateToAngle(135, rotateSpeed);
                 robot.log("Step16-Rotate 135 degrees counter clockwise.");
 
                 //Step 17
@@ -294,7 +299,7 @@ public class AutoConeStackLeft extends LinearOpMode {
                 robot.log("Step17-Lift to ground (0 ticks)");
 
                 //Step 18
-                rotateToAngle(-90, 0.4f);
+                rotateToAngle(-90, rotateSpeed);
                 robot.log("Step18-Rotate 90 degrees clockwise.");
 
                 //Step 19
