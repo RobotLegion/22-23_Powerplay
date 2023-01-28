@@ -1,27 +1,16 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.os.Environment;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 
-
-@Autonomous(name="AutoRight", group="Robot")
+@Autonomous(name = "AutoRight", group = "Robot")
 
 
 public class AutoRight extends LinearOpMode {
@@ -31,7 +20,7 @@ public class AutoRight extends LinearOpMode {
     boolean DEBUG = true;
     int DEBUG_MS = 0;
     // target positions on playing field
-    double distanceToJunction = 4.0/12.0;          // feet
+    double distanceToJunction = 4.0 / 12.0;          // feet
     double distanceToRotate = 0.6;          // feet
     // T=position from starting point to where we need to strafe for parking 1/3 (in feet)
     double distanceToStrafe = (32.0 / 12.0) - distanceToRotate;    // feet
@@ -41,7 +30,7 @@ public class AutoRight extends LinearOpMode {
     double distanceToParkingZone = (39.0 / 12.0) - distanceToRotate;    // feet
     //R=position where the robot can rotate at the beginning of the match to score.
 
-    double correctionForConeReading = (1.25/12.0); //feet
+    double correctionForConeReading = (1.25 / 12.0); //feet
 
     //Same variables from Robot, but they are negative. Using the Robot variables for lift levels, the lift tried to go down??? This fixed it.
     double coneLiftlevel = 0.08; // feet
@@ -67,6 +56,7 @@ public class AutoRight extends LinearOpMode {
 
         // INITALIZE ROBOT
         robot.init(hardwareMap);
+        robot.log("Begin Auto Right");
 
         // Set direction of all motors so that when we command
         // the direction "forward", the values of speed are positive
@@ -122,38 +112,39 @@ public class AutoRight extends LinearOpMode {
             moveLiftBlocking(coneLiftlevel, liftPower);
             robot.clawClose();
             driveToPosition("right", 0.8f, distanceToRotate);
-            robot.log("Step1");
+            robot.log("Step1- Close claw and strafe right distanceToRotate");
 
             //Step 2
             robot.driveWithoutEncoder();
             rotateToAngle(-130, rotateSpeed);
             robot.driveWithEncoder();
-            robot.log("Step2");
+            robot.log("Step2-Rotate clockwise 130 degrees");
 
             //Step3a
             moveLiftBlocking(smallLiftlevel, liftPower);
             robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
-            robot.log("Step3");
+            robot.log("Step3-Lift up to smallLiftLevel");
 
             //Step3b
             driveToPosition("forward", 0.3f, distanceToJunction);
-            robot.log("Step3b");
+            robot.log("Step3b-Drive to junction");
 
             //Step3c
             robot.clawOpen();
-            robot.log("Step3c");
+            robot.log("Step3c-Open claw");
 
             //Step3d
             driveToPosition("backward", 0.3f, distanceToJunction);
-            robot.log("Step3d");
+            robot.log("Step3d-Drive back from junction");
 
             //Step3f
             moveLiftBlocking(ground, liftPower);
             robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
-            robot.log("Step3f");
+            robot.log("Step3f-Lift to ground (0 ticks)");
 
             //Step 3g
             robot.clawOpen();
+            robot.log("Step3g-Open claw");
 
             //Step4
             robot.driveWithoutEncoder();
@@ -161,7 +152,7 @@ public class AutoRight extends LinearOpMode {
             robot.driveStopAndReset();
             robot.driveWithEncoder();
             driveToPosition("left", 0.3f, correctionForConeReading);
-            robot.log("Step4");
+            robot.log("Step4-Rotate clockwise 123 degrees and then strafe left to correctionForConeReading");
 
             // calculate c which represents the distance from starting point to where we detected the cone
             // double c = robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks);
@@ -174,7 +165,7 @@ public class AutoRight extends LinearOpMode {
             double speed = -0.1;
 
             double distanceDriven = 0.0;
-            while (robot.alphaAverage(robot.colorSensorBack) < 200 && distanceDriven <= distanceToParkingZone) {
+            while (!robot.isColorValid(robot.colorSensorBack) && distanceDriven <= distanceToParkingZone) {
 
                 distanceDriven = Math.abs(robot.topLeft.getCurrentPosition()) * robot.ticksToFeet;
 
@@ -190,7 +181,7 @@ public class AutoRight extends LinearOpMode {
 
             robot.stopDriveMotors();
 
-            double c= Math.abs(robot.topLeft.getCurrentPosition()*(1.0/robot.feetToTicks));
+            double c = Math.abs(robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks));
 
             if (DEBUG) {
                 robot.log("final distance driven", c);
@@ -236,7 +227,7 @@ public class AutoRight extends LinearOpMode {
             robot.log("green", greenNorm);
             robot.log("blue", blueNorm);
             // check which parking zone the cone represents
-            if (isParking1(redNorm, greenNorm, blueNorm)) {
+            if (robot.isParking1(redNorm, greenNorm, blueNorm)) {
                 robot.log("Parking 1");
 
                 // drive forward at 0.2 speed to position T (relative)
@@ -249,7 +240,7 @@ public class AutoRight extends LinearOpMode {
                 // drive forward at 0.2 speed to position P (relative)
                 driveToPosition("backward", 0.2f, distanceToParkingZone - distanceToStrafe);
 
-            } else if (isParking3(redNorm, greenNorm, blueNorm)) {
+            } else if (robot.isParking3(redNorm, greenNorm, blueNorm)) {
                 robot.log("Parking 3");
 
                 // drive forward at 0.2 speed to position T (relative)
@@ -276,15 +267,7 @@ public class AutoRight extends LinearOpMode {
         robot.destroy();
     }
 
-    // stop all the motors
-    public void stopMotors() {
-        robot.topRight.setPower(0);
-        robot.bottomRight.setPower(0);
-        robot.topLeft.setPower(0);
-        robot.bottomLeft.setPower(0);
-    }
-
-    public void resetAngle(){
+    public void resetAngle() {
         lastAngles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
         globalAngle = 0.0;
@@ -311,8 +294,9 @@ public class AutoRight extends LinearOpMode {
 
         return globalAngle;
     }
+
     public void rotateToAngle(int degrees, double power) {
-        double  leftPower, rightPower;
+        double leftPower, rightPower;
 
         resetAngle();
 
@@ -371,8 +355,8 @@ public class AutoRight extends LinearOpMode {
 
         // wait in this loop as long as at least 1 motor is still moving
         // motors report busy until they reach the target position
-        while (opModeIsActive() && Math.abs(robot.liftMotor.getCurrentPosition()-tickTarget) > 10) {
-            telemetry.addData("lift motor", Math.abs(robot.liftMotor.getCurrentPosition()-tickTarget));
+        while (opModeIsActive() && Math.abs(robot.liftMotor.getCurrentPosition() - tickTarget) > 10) {
+            telemetry.addData("lift motor", Math.abs(robot.liftMotor.getCurrentPosition() - tickTarget));
             telemetry.update();
         }
 
@@ -385,37 +369,34 @@ public class AutoRight extends LinearOpMode {
     // Direction=forward/backward/left/right
     // Speed=0.0-1.0
     // Target=Feet
-    public void driveToPosition(String direction, float speed, double target){
+    public void driveToPosition(String direction, float speed, double target) {
         // stop motors and reset encoder to 0
         robot.driveStopAndReset();
 
         // convert our target (in feet) to ticks that the motor can understand
-        int tickTarget = (int)(target * robot.feetToTicks);
+        int tickTarget = (int) (target * robot.feetToTicks);
 
         // set motor target positions based on direction
-        if (direction == "forward"){
+        if (direction == "forward") {
             // forward = all positive
             robot.topLeft.setTargetPosition(tickTarget);
             robot.topRight.setTargetPosition(tickTarget);
             robot.bottomLeft.setTargetPosition(tickTarget);
             robot.bottomRight.setTargetPosition(tickTarget);
-        }
-        else if(direction == "backward"){
+        } else if (direction == "backward") {
             // backward = all negative
             robot.topLeft.setTargetPosition(-tickTarget);
             robot.topRight.setTargetPosition(-tickTarget);
             robot.bottomLeft.setTargetPosition(-tickTarget);
             robot.bottomRight.setTargetPosition(-tickTarget);
-        }
-        else if(direction == "left"){
+        } else if (direction == "left") {
             // left = topLeft and bottomRight negative,
             // topRight and bottomLeft positive
             robot.topLeft.setTargetPosition(-tickTarget);
             robot.topRight.setTargetPosition(tickTarget);
             robot.bottomLeft.setTargetPosition(tickTarget);
             robot.bottomRight.setTargetPosition(-tickTarget);
-        }
-        else if(direction == "right"){
+        } else if (direction == "right") {
             // right = opposite of left
             robot.topLeft.setTargetPosition(tickTarget);
             robot.topRight.setTargetPosition(-tickTarget);
@@ -431,7 +412,7 @@ public class AutoRight extends LinearOpMode {
 
         // wait in this loop as long as at least 1 motor is still moving
         // motors report busy until they reach the target position
-        while (opModeIsActive() && (robot.bottomRight.isBusy() || robot.topRight.isBusy() || robot.bottomLeft.isBusy() || robot.topLeft.isBusy() )) {
+        while (opModeIsActive() && (robot.bottomRight.isBusy() || robot.topRight.isBusy() || robot.bottomLeft.isBusy() || robot.topLeft.isBusy())) {
 //            telemetry.addData("top left", robot.topLeft.getCurrentPosition()*(1.0/robot.feetToTicks));
 //            telemetry.addData("top right", robot.topRight.getCurrentPosition()*(1.0/robot.feetToTicks));
 //            telemetry.addData("bottom left", robot.bottomLeft.getCurrentPosition()*(1.0/robot.feetToTicks));
@@ -445,73 +426,6 @@ public class AutoRight extends LinearOpMode {
 
         // stop motors
         robot.stopDriveMotors();
-    }
-
-
-    // COLOR SENSOR FUNCTIONS
-    // check if the input color sensor r,g,b values represent parking zone 1
-    public boolean isParking1(double r, double g, double b) {
-
-        // perfect reading:   r=1.00, g=0.50, b=0.70
-        // imperfect reading: r=0.70, g=1.00, b=0.900
-
-        // initalize all check variables to false
-        boolean redCheck = false;
-        boolean greenCheck = false;
-        boolean blueCheck = false;
-
-        // check if r is in the range
-        if (r >= 0.6 && r <= 1.0) {
-            redCheck = true;
-        }
-
-        // check if g is in the range
-        if (g >= 0.4 && g <= 1.0) {
-            greenCheck = true;
-        }
-
-        // check if b is in the range
-        if (b >= 0.6 && b <= 1.0) {
-            blueCheck = true;
-        }
-
-        // if all color checks are true, return true
-        // otherwise, return false
-        if (redCheck && greenCheck && blueCheck) {
-            return true;
-        } else return false;
-    }
-    // check if the input color sensor r,g,b values represent parking zone 3
-    public boolean isParking3(double r, double g, double b) {
-
-        // perfect reading:   r=0.56, g=1.00, b=0.27
-        // imperfect reading: r=0.58, g=1.00, b=0.64
-
-        // initalize all check variables to false
-        boolean redCheck = false;
-        boolean greenCheck = false;
-        boolean blueCheck = false;
-
-        // check if r is in the range
-        if (r >= 0.4 && r <= 0.6) {
-            redCheck = true;
-        }
-
-        // check if g is in the range
-        if (g >= 0.7 && g <= 1.0 ) {
-            greenCheck = true;
-        }
-
-        // check if b is in the range
-        if (b >= 0.1 && b <= 0.7) {
-            blueCheck = true;
-        }
-
-        // if all color checks are true, return true
-        // otherwise, return false
-        if (redCheck && greenCheck && blueCheck) {
-            return true;
-        } else return false;
     }
 }
 
