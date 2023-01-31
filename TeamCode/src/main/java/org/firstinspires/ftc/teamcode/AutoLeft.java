@@ -33,7 +33,7 @@ public class AutoLeft extends LinearOpMode {
     double correctionForConeReading = (1.25 / 12.0); //feet
 
     //Same variables from Robot, but they are negative. Using the Robot variables for lift levels, the lift tried to go down??? This fixed it.
-    double coneLiftlevel = 0.08; // feet
+    double coneLiftlevel = 0.09; // feet
     double smallLiftlevel = 0.86; // feet
     double ground = 0.01; //feet
 
@@ -121,7 +121,7 @@ public class AutoLeft extends LinearOpMode {
 
             //Step 3a
             robot.driveWithoutEncoder();
-            rotateToAngle(141, rotateSpeed);
+            rotateToAngle(142, rotateSpeed);
             robot.driveWithEncoder();
             robot.log("Step3a-Rotate counter-clockwise 130 degrees");
 

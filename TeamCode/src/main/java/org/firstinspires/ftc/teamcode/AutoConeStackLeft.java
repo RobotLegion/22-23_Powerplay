@@ -310,13 +310,17 @@ public class AutoConeStackLeft extends LinearOpMode {
 
             } else if (robot.isParking3(redNorm, greenNorm, blueNorm)) {
                 robot.log("Parking 3");
+                telemetry.addLine("Parking 1");
+                telemetry.update();
 
                 //Step 4
                 driveToPosition("backward", 0.4f, distanceToLine);
                 robot.log("Step4-Drive to distanceToLine");
 
                 //Step 5
+                robot.driveWithoutEncoder();
                 rotateToAngle(90, 0.3f);
+                robot.driveWithEncoder();
                 robot.log("Step5-Rotate 90 degrees counter clockwise");
 
                 //Step 6
@@ -340,7 +344,9 @@ public class AutoConeStackLeft extends LinearOpMode {
                 robot.log("Step10-Drive distanceToConeStack backwards");
 
                 //Step 11
+                robot.driveWithoutEncoder();
                 rotateToAngle(135, 0.4);
+                robot.driveWithEncoder();
                 robot.log("Step11-Rotate 135 degrees counter clockwise.");
 
                 //Step 12

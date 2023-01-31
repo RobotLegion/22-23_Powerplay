@@ -20,7 +20,7 @@ public class AutoRight extends LinearOpMode {
     boolean DEBUG = true;
     int DEBUG_MS = 0;
     // target positions on playing field
-    double distanceToJunction = 5.0 / 12.0;          // feet
+    double distanceToJunction = 4.0 / 12.0;          // feet
     double distanceToRotate = 0.6;          // feet
     // T=position from starting point to where we need to strafe for parking 1/3 (in feet)
     double distanceToStrafe = (30.0 / 12.0) - distanceToRotate;    // feet
@@ -33,7 +33,7 @@ public class AutoRight extends LinearOpMode {
     double correctionForConeReading = (1.25 / 12.0); //feet
 
     //Same variables from Robot, but they are negative. Using the Robot variables for lift levels, the lift tried to go down??? This fixed it.
-    double coneLiftlevel = 0.08; // feet
+    double coneLiftlevel = 0.09; // feet
     double smallLiftlevel = 0.86; // feet
     double ground = 0.01; //feet
 

@@ -67,3 +67,13 @@ The lift uses our new logging system to write out which lift level it is at duri
 ###Release Autonomous
 The robot releases cones in autonomous by using our clawOpen() command we keep in the robot file so we can also access it easily in Teleop.
 ###
+
+### Log Instructions
+
+Assumes you are connected to robot
+
+1. `cd C:\Robotics\platform-tools`
+2. `adb.exe shell`
+3.  `cd storage/self/primary/FIRST/data/`
+4. `ls -l` PICK THE LAST ONE!!!
+5. `cat <name of file>.txt`
