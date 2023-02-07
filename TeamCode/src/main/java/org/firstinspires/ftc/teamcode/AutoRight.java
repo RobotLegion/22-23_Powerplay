@@ -30,7 +30,7 @@ public class AutoRight extends LinearOpMode {
     double distanceToParkingZone = (39.0 / 12.0) - distanceToRotate;    // feet
     //R=position where the robot can rotate at the beginning of the match to score.
 
-    double correctionForConeReading = (1.25 / 12.0); //feet
+   // double correctionForConeReading = (1.25 / 12.0); //feet
 
     //Same variables from Robot, but they are negative. Using the Robot variables for lift levels, the lift tried to go down??? This fixed it.
     double coneLiftlevel = 0.09; // feet
@@ -157,7 +157,7 @@ public class AutoRight extends LinearOpMode {
 
             robot.driveStopAndReset();
             robot.driveWithEncoder();
-            double speed = -0.1;
+            double speed = -0.3;
 
             double distanceDriven = 0.0;
             while (!robot.isColorValid(robot.colorSensorBack) && distanceDriven <= distanceToParkingZone) {
@@ -181,7 +181,6 @@ public class AutoRight extends LinearOpMode {
             if (DEBUG) {
                 robot.log("final distance driven", c);
             }
-
 
 //            double speed = -0.3;
 //            double distanceDriven = Math.abs(robot.topLeft.getCurrentPosition())    * robot.ticksToFeet;
@@ -221,9 +220,12 @@ public class AutoRight extends LinearOpMode {
             robot.log("red", redNorm);
             robot.log("green", greenNorm);
             robot.log("blue", blueNorm);
+
             // check which parking zone the cone represents
             if (robot.isParking1(redNorm, greenNorm, blueNorm)) {
                 robot.log("Parking 1");
+                telemetry.addLine("Parking 1");
+                telemetry.update();
 
                 // drive forward at 0.2 speed to position T (relative)
 
@@ -243,6 +245,8 @@ public class AutoRight extends LinearOpMode {
 
             } else if (robot.isParking3(redNorm, greenNorm, blueNorm)) {
                 robot.log("Parking 3");
+                telemetry.addLine("Parking 3");
+                telemetry.update();
 
                 // drive forward at 0.2 speed to position T (relative)
                 driveToPosition("backward", 0.2f, distanceToStrafe - c);
@@ -260,6 +264,8 @@ public class AutoRight extends LinearOpMode {
 
             } else {
                 robot.log("Parking 2");
+                telemetry.addLine("Parking 2");
+                telemetry.update();
 
                 // drive forward at 0.2 speed to position P (relative)
                 driveToPosition("backward", 0.2f, distanceToParkingZone - c);
@@ -272,7 +278,7 @@ public class AutoRight extends LinearOpMode {
             }
 
             /* WE ARE AT PARKING POSITION */
-            robot.log("We did it!");
+            robot.log("WE DID IT!");
         }
 
         robot.destroy();

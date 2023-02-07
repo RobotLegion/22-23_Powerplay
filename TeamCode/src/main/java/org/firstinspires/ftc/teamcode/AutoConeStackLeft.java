@@ -9,9 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-
 @Autonomous(name = "AutoConeStackLeft", group = "Robot")
-
 
 public class AutoConeStackLeft extends LinearOpMode {
 
@@ -31,7 +29,7 @@ public class AutoConeStackLeft extends LinearOpMode {
     double distanceToLine = (32.0 / 12.0); //feet
 
     //Distance to cone stack
-    double distanceToConeStack = (12.0 / 12.0); //feet
+    double distanceToConeStack = (14.0 / 12.0); //feet
 
     double correctionForConeReading = (1.25 / 12.0); //feet
 
@@ -46,7 +44,6 @@ public class AutoConeStackLeft extends LinearOpMode {
     // lift
     float liftPower = 0.8f;         // 0-1
 
-
     // instantiate a robot class
     Robot robot = new Robot();
 
@@ -54,7 +51,6 @@ public class AutoConeStackLeft extends LinearOpMode {
 //    Orientation angles      = new Orientation();
     Orientation lastAngles = new Orientation();
     double globalAngle = 0.0;
-
 
     public void runOpMode() {
 
@@ -119,7 +115,6 @@ public class AutoConeStackLeft extends LinearOpMode {
             robot.driveWithEncoder();
             robot.log("Step3a-Rotate counter-clockwise 130 degrees");
 
-
             //Step3b
             driveToPosition("forward", 0.3f, distanceToJunction);
             robot.log("Step3b-Drive to junction");
@@ -151,7 +146,8 @@ public class AutoConeStackLeft extends LinearOpMode {
 
             robot.driveStopAndReset();
             robot.driveWithEncoder();
-            double speed = -0.1;
+
+            double speed = -0.3;
 
             double distanceDriven = 0.0;
             while (robot.alphaAverage(robot.colorSensorBack) < 200 && distanceDriven <= distanceToParkingZone) {
@@ -160,7 +156,6 @@ public class AutoConeStackLeft extends LinearOpMode {
 
                 robot.log("alpha", robot.alphaAverage(robot.colorSensorBack));
                 robot.log("distance driven", robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks));
-
 
                 robot.topLeft.setPower(speed);
                 robot.topRight.setPower(speed);
@@ -173,7 +168,6 @@ public class AutoConeStackLeft extends LinearOpMode {
             double c = Math.abs(robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks));
 
             robot.log("c", c);
-
 
 //            double speed = -0.3;
 //            double distanceDriven = Math.abs(robot.topLeft.getCurrentPosition())    * robot.ticksToFeet;
@@ -253,7 +247,7 @@ public class AutoConeStackLeft extends LinearOpMode {
                 robot.log("Step5-Rotate 90 degrees counter clockwise");
 
                 //Step 6
-                   moveLiftBlocking(coneStackLevel, liftPower);
+                moveLiftBlocking(coneStackLevel, liftPower);
                 robot.log("Step6-Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
 
                 //Step 7
@@ -291,7 +285,7 @@ public class AutoConeStackLeft extends LinearOpMode {
                 robot.log("Step14-Drive distanceToJunction backwards");
 
                 //Step 15
-                   moveLiftBlocking(coneStackLevel, liftPower);
+                moveLiftBlocking(coneStackLevel, liftPower);
                 robot.log("Step15-Lift to cone stack level");
 
                 //Step 16
@@ -318,7 +312,7 @@ public class AutoConeStackLeft extends LinearOpMode {
 
             } else if (robot.isParking3(redNorm, greenNorm, blueNorm)) {
                 robot.log("Parking 3");
-                telemetry.addLine("Parking 1");
+                telemetry.addLine("Parking 3");
                 telemetry.update();
 
                 //Step 4
@@ -332,7 +326,7 @@ public class AutoConeStackLeft extends LinearOpMode {
                 robot.log("Step5-Rotate 90 degrees counter clockwise");
 
                 //Step 6
-                   moveLiftBlocking(coneStackLevel, liftPower);
+                moveLiftBlocking(coneStackLevel, liftPower);
                 robot.log("Step6-Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
 
                 //Step 7
@@ -370,7 +364,7 @@ public class AutoConeStackLeft extends LinearOpMode {
                 robot.log("Step14-Drive distanceToJunction backwards");
 
                 //Step 15
-                   moveLiftBlocking(coneStackLevel, liftPower);
+                moveLiftBlocking(coneStackLevel, liftPower);
                 robot.log("Step15-Lift to cone stack level");
 
                 //Step 16
@@ -394,11 +388,11 @@ public class AutoConeStackLeft extends LinearOpMode {
 
                 //Step 20
                 stopMotors();
-
             }
         } else {
             robot.log("Parking 2");
-
+            telemetry.addLine("Parking 2");
+            telemetry.update();
             //Step 4
             driveToPosition("backward", 0.4f, distanceToLine);
             robot.log("Step4-Drive to distanceToLine");
@@ -410,7 +404,7 @@ public class AutoConeStackLeft extends LinearOpMode {
             robot.log("Step5-Rotate 90 degrees counter clockwise");
 
             //Step 6
-               moveLiftBlocking(coneStackLevel, liftPower);
+            moveLiftBlocking(coneStackLevel, liftPower);
             robot.log("Step6-Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
 
             //Step 7
@@ -448,7 +442,7 @@ public class AutoConeStackLeft extends LinearOpMode {
             robot.log("Step14-Drive distanceToJunction backwards");
 
             //Step 15
-               moveLiftBlocking(coneStackLevel, liftPower);
+            moveLiftBlocking(coneStackLevel, liftPower);
             robot.log("Step15-Lift to cone stack level");
 
             //Step 16
@@ -466,12 +460,14 @@ public class AutoConeStackLeft extends LinearOpMode {
             rotateToAngle(-90, 0.4f);
             robot.driveWithEncoder();
             robot.log("Step18-Rotate 90 degrees clockwise.");
+
+            //Step 19
+            stopMotors();
         }
 
         /* WE ARE AT PARKING POSITION */
         robot.log("WE DID IT! :D");
     }
-
 
     // stop all the motors
     public void stopMotors() {

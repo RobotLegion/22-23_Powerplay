@@ -9,26 +9,27 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+@Autonomous(name = "AutoConeStackRight", group = "Robot")
 
-@Autonomous(name = "AutoLeft", group = "Robot")
-
-
-public class AutoLeft extends LinearOpMode {
+public class AutoConeStackRight extends LinearOpMode {
 
     // CONFIGURATION
-
-    boolean DEBUG = true;
-    int DEBUG_MS = 0;
     // target positions on playing field
     double distanceToJunction = 4.0 / 12.0;          // feet
     double distanceToRotate = 0.6;          // feet
-    // T=position from starting point to where we need to strafe for parking 1/3 (in feet)
-    double distanceToStrafe = (30.0 / 12.0) - distanceToRotate;    // feet
+    //   // T=position from starting point to where we need to strafe for parking 1/3 (in feet)
+//   double distanceToStrafe = (32.0 / 12.0) - distanceToRotate;    // feet
     // S=position from T to left or right for parking 1/3 (in feet)
     double distanceSidewaysToParking = 27.0 / 12.0;    // feet
     // P=position from starting point to parking position for 1/2/3 (in feet)
     double distanceToParkingZone = (39.0 / 12.0) - distanceToRotate;    // feet
     //R=position where the robot can rotate at the beginning of the match to score.
+
+    //Distance to line
+    double distanceToLine = (32.0 / 12.0); //feet
+
+    //Distance to cone stack
+    double distanceToConeStack = (14.0 / 12.0); //feet
 
     double correctionForConeReading = (1.25 / 12.0); //feet
 
@@ -36,6 +37,7 @@ public class AutoLeft extends LinearOpMode {
     double coneLiftlevel = 0.09; // feet
     double smallLiftlevel = 0.86; // feet
     double ground = 0.01; //feet
+    double coneStackLevel = 0.35; //feet
 
     float rotateSpeed = 0.3f;
 
@@ -51,12 +53,10 @@ public class AutoLeft extends LinearOpMode {
     Orientation lastAngles = new Orientation();
     double globalAngle = 0.0;
 
-
     public void runOpMode() {
 
         // INITALIZE ROBOT
         robot.init(hardwareMap);
-        robot.log("Begin Auto Left");
 
         // Set direction of all motors so that when we command
         // the direction "forward", the values of speed are positive
@@ -75,9 +75,8 @@ public class AutoLeft extends LinearOpMode {
         // Enables motor encoders to track how much the motors have rotated
         robot.driveWithEncoder();
 
-
-        robot.log("Calibrating gyro...");
-
+        telemetry.addLine("Calibrating gyro...");
+        telemetry.update();
 
         // make sure the imu gyro is calibrated before continuing.
         while (!isStopRequested() && !robot.imu.isGyroCalibrated()) {
@@ -86,32 +85,24 @@ public class AutoLeft extends LinearOpMode {
         }
 
         // Wait for start button press on Driver Station
-        robot.log("Waiting for start...");
-
+        telemetry.addLine("Waiting for start...");
+        telemetry.update();
         waitForStart();
 
         // While the mode is active (has not been stopped / time has not expired)
         if (opModeIsActive()) {
 
             /* WE ARE AT STARTING POSITION */
-            //Step 1= close claw
-            //Step 2= rotate counter clockwise 135 deg
-            //Step 3 = score
-            //Step 3a= drive to junction
-            //Step 3b= lift up to small position
-            //Step 3c= open claw
-            //Step 3d = backup
-            //Step 3e= close claw
-            //Step 3f= lower lift
-            //Step 4= rotate 135 so the back of the robot faces the signal cone.
-            //Step 5= Basic Auto
-
+            //PART 1
+            //Step 1= Score on small junction from other auto
+            //Step 2= Rotate so the back of the robot is facing the signal cone
+            //Step 3= Read color
 
             //Step 1
             robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
             moveLiftBlocking(coneLiftlevel, liftPower);
             robot.clawClose();
-            driveToPosition("left", 0.8f, distanceToRotate);
+            driveToPosition("right", 0.8f, distanceToRotate);
             robot.log("Step1-Close Claw");
 
             //Step2
@@ -121,7 +112,7 @@ public class AutoLeft extends LinearOpMode {
 
             //Step 3a
             robot.driveWithoutEncoder();
-            rotateToAngle(137, rotateSpeed);
+            rotateToAngle(-123, rotateSpeed);
             robot.driveWithEncoder();
             robot.log("Step3a-Rotate counter-clockwise 130 degrees");
 
@@ -143,31 +134,29 @@ public class AutoLeft extends LinearOpMode {
 
             //Step4
             robot.driveWithoutEncoder();
-            rotateToAngle(121, rotateSpeed);
+            rotateToAngle(-128, rotateSpeed);
             robot.driveStopAndReset();
             robot.driveWithEncoder();
-            //driveToPosition("right", 0.3f, correctionForConeReading);
+            // driveToPosition("right", 0.3f, correctionForConeReading);
             robot.log("Step4-Rotate counter clockwise 123 degrees and then strafe right to correctionForConeReading");
 
-            // calculate c which represents the distance from starting point to where we detected the cone
-            // double c = robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks);
-
-//            driveToPosition("backward", 0.3f, c);
-//            robot.stopDriveMotors();
+            //Step3f
+            moveLiftBlocking(ground, liftPower);
+            robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+            robot.log("Step3f-Lift down to ground level (0 ticks)");
 
             robot.driveStopAndReset();
             robot.driveWithEncoder();
             double speed = -0.3;
 
             double distanceDriven = 0.0;
-            while (!robot.isColorValid(robot.colorSensorBack) && distanceDriven <= distanceToParkingZone) {
+            while (robot.alphaAverage(robot.colorSensorBack) < 200 && distanceDriven <= distanceToParkingZone) {
 
                 distanceDriven = Math.abs(robot.topLeft.getCurrentPosition()) * robot.ticksToFeet;
 
-                if (DEBUG) {
-                    robot.log("distance driven", distanceDriven);
-                    robot.log("alpha", robot.alphaAverage(robot.colorSensorBack));
-                }
+                robot.log("alpha", robot.alphaAverage(robot.colorSensorBack));
+                robot.log("distance driven", robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks));
+
                 robot.topLeft.setPower(speed);
                 robot.topRight.setPower(speed);
                 robot.bottomLeft.setPower(speed);
@@ -178,10 +167,7 @@ public class AutoLeft extends LinearOpMode {
 
             double c = Math.abs(robot.topLeft.getCurrentPosition() * (1.0 / robot.feetToTicks));
 
-            if (DEBUG) {
-                robot.log("final distance driven", c);
-            }
-
+            robot.log("c", c);
 
 //            double speed = -0.3;
 //            double distanceDriven = Math.abs(robot.topLeft.getCurrentPosition())    * robot.ticksToFeet;
@@ -223,54 +209,271 @@ public class AutoLeft extends LinearOpMode {
             robot.log("blue", blueNorm);
 
             // check which parking zone the cone represents
+
+            /* WE ARE AT STARTING POSITION */
+            //PART 2
+            //Step 4= Drive backward to red line
+            //Step 5= Rotate to face cone stack
+            //Step 6= Drive forward to cone stack
+            //Step 7= Raise lift
+            //Step 8= Close claw
+            //Step 9= Lift up to medium lift level
+            //Step 10= Drive backward to the center of the tile
+            //Step 11= Rotate to the medium junction
+            //Step 12= Drive forward to touch junction
+            //Step 13= Open claw
+            //Step 14= Back up same distance driven before
+            //Step 15= Lower lift to cone stack height
+            //Step 16= Rotate back to cone stack position
+            //Step 17= Lower lift to bottom
+            //Step 18= Rotate so robot is facing us (backward)
+            //Step 19= Strafe left, right, or stop motors depending on parking zone.
+
             if (robot.isParking1(redNorm, greenNorm, blueNorm)) {
                 robot.log("Parking 1");
+                telemetry.addLine("Parking 1");
+                telemetry.update();
 
-                // drive forward at 0.2 speed to position T (relative)
-                driveToPosition("backward", 0.2f, distanceToStrafe - c);
+                //Step 4
+                driveToPosition("backward", 0.4f, distanceToLine);
+                telemetry.addLine("Step4-Drive distanceToLine");
+                telemetry.update();
+                robot.log("Step4-Drive to distanceToLine");
 
-                // drive left at 0.4 speed to position S (relative)
-                driveToPosition("right", 0.6f, distanceSidewaysToParking);
+                //Step 5
+                robot.driveWithoutEncoder();
+                rotateToAngle(90, rotateSpeed);
+                robot.driveWithEncoder();
+                robot.log("Step5-Rotate 90 degrees counter clockwise");
 
-                // drive forward at 0.2 speed to position P (relative)
-                driveToPosition("backward", 0.2f, distanceToParkingZone - distanceToStrafe);
+                //Step 6
+                moveLiftBlocking(coneStackLevel, liftPower);
+                robot.log("Step6-Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
 
-                //Step3f
+                //Step 7
+                driveToPosition("forward", 0.4f, distanceToConeStack);
+                robot.log("Step7-Drive distanceToConeStack");
+
+                //Step 8
+                robot.clawClose();
+                robot.log("Step8-Close claw");
+
+                //Step 9
+                moveLiftBlocking(robot.mediumLiftlevel, liftPower);
+                robot.log("Step9-Medium Lift level");
+
+                //Step 10
+                driveToPosition("backward", 0.4f, distanceToConeStack);
+                robot.log("Step10-Drive distanceToConeStack backwards");
+
+                //Step 11
+                robot.driveWithoutEncoder();
+                rotateToAngle(135, rotateSpeed);
+                robot.driveWithEncoder();
+                robot.log("Step11-Rotate 135 degrees counter clockwise.");
+
+                //Step 12
+                driveToPosition("forward", 0.3f, distanceToJunction);
+                robot.log("Step12-Drive distanceToJunction");
+
+                //Step 13
+                robot.clawOpen();
+                robot.clawClose();
+
+                //Step 14
+                driveToPosition("backward", 0.4f, distanceToJunction);
+                robot.log("Step14-Drive distanceToJunction backwards");
+
+                //Step 15
+                moveLiftBlocking(coneStackLevel, liftPower);
+                robot.log("Step15-Lift to cone stack level");
+
+                //Step 16
+                robot.driveWithoutEncoder();
+                rotateToAngle(135, rotateSpeed);
+                robot.driveWithEncoder();
+                robot.log("Step16-Rotate 135 degrees counter clockwise.");
+
+                //Step 17
                 moveLiftBlocking(ground, liftPower);
-                robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+                robot.log("Step17-Lift to ground (0 ticks)");
+
+                //Step 18
+                robot.driveWithoutEncoder();
+                rotateToAngle(-90, rotateSpeed);
+                robot.driveWithEncoder();
+                robot.log("Step18-Rotate 90 degrees clockwise.");
+
+                //Step 19
+                driveToPosition("right", 0.4f, distanceSidewaysToParking);
+
+                //Step 20
+                stopMotors();
 
             } else if (robot.isParking3(redNorm, greenNorm, blueNorm)) {
                 robot.log("Parking 3");
+                telemetry.addLine("Parking 3");
+                telemetry.update();
 
-                // drive forward at 0.2 speed to position T (relative)
-                driveToPosition("backward", 0.2f, distanceToStrafe - c);
+                //Step 4
+                driveToPosition("backward", 0.4f, distanceToLine);
+                robot.log("Step4-Drive to distanceToLine");
 
-                // drive right at 0.4 speed to position S (relative)
-                driveToPosition("left", 0.6f, distanceSidewaysToParking);
+                //Step 5
+                robot.driveWithoutEncoder();
+                rotateToAngle(90, rotateSpeed);
+                robot.driveWithEncoder();
+                robot.log("Step5-Rotate 90 degrees counter clockwise");
 
-                // drive forward at 0.2 speed to position P (relative)
-                driveToPosition("backward", 0.2f, distanceToParkingZone - distanceToStrafe);
+                //Step 6
+                moveLiftBlocking(coneStackLevel, liftPower);
+                robot.log("Step6-Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
 
-                //Step3f
+                //Step 7
+                driveToPosition("forward", 0.4f, distanceToConeStack);
+                robot.log("Step7-Drive distanceToConeStack");
+
+                //Step 8
+                robot.clawClose();
+                robot.log("Step8-Close claw");
+
+                //Step 9
+                moveLiftBlocking(robot.mediumLiftlevel, liftPower);
+                robot.log("Step9-Medium Lift level");
+
+                //Step 10
+                driveToPosition("backward", 0.4f, distanceToConeStack);
+                robot.log("Step10-Drive distanceToConeStack backwards");
+
+                //Step 11
+                robot.driveWithoutEncoder();
+                rotateToAngle(135, rotateSpeed);
+                robot.driveWithEncoder();
+                robot.log("Step11-Rotate 135 degrees counter clockwise.");
+
+                //Step 12
+                driveToPosition("forward", 0.3f, distanceToJunction);
+                robot.log("Step12-Drive distanceToJunction");
+
+                //Step 13
+                robot.clawOpen();
+                robot.clawClose();
+
+                //Step 14
+                driveToPosition("backward", 0.4f, distanceToJunction);
+                robot.log("Step14-Drive distanceToJunction backwards");
+
+                //Step 15
+                moveLiftBlocking(coneStackLevel, liftPower);
+                robot.log("Step15-Lift to cone stack level");
+
+                //Step 16
+                robot.driveWithoutEncoder();
+                rotateToAngle(135, rotateSpeed);
+                robot.driveWithEncoder();
+                robot.log("Step16-Rotate 135 degrees counter clockwise.");
+
+                //Step 17
                 moveLiftBlocking(ground, liftPower);
-                robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+                robot.log("Step17-Lift to ground (0 ticks)");
 
-            } else {
-                robot.log("Parking 2");
+                //Step 18
+                robot.driveWithoutEncoder();
+                rotateToAngle(-90, rotateSpeed);
+                robot.driveWithEncoder();
+                robot.log("Step18-Rotate 90 degrees clockwise.");
 
-                // drive forward at 0.2 speed to position P (relative)
-                driveToPosition("backward", 0.2f, distanceToParkingZone - c);
+                //Step 19
+                driveToPosition("right", 0.4f, distanceSidewaysToParking);
 
-                //Step3f
-                moveLiftBlocking(ground, liftPower);
-                robot.log("Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+                //Step 20
+                stopMotors();
+
             }
+        } else {
+            robot.log("Parking 2");
+            telemetry.addLine("Parking 2");
+            telemetry.update();
 
-            /* WE ARE AT PARKING POSITION */
-            robot.log("We did it! :D");
+            //Step 4
+            driveToPosition("backward", 0.4f, distanceToLine);
+            robot.log("Step4-Drive to distanceToLine");
+
+            //Step 5
+            robot.driveWithoutEncoder();
+            rotateToAngle(90, rotateSpeed);
+            robot.driveWithEncoder();
+            robot.log("Step5-Rotate 90 degrees counter clockwise");
+
+            //Step 6
+            moveLiftBlocking(coneStackLevel, liftPower);
+            robot.log("Step6-Lift Level", robot.liftLevelNames[robot.currentLiftLevel]);
+
+            //Step 7
+            driveToPosition("forward", 0.4f, distanceToConeStack);
+            robot.log("Step7-Drive distanceToConeStack");
+
+            //Step 8
+            robot.clawClose();
+            robot.log("Step8-Close claw");
+
+            //Step 9
+            moveLiftBlocking(robot.mediumLiftlevel, liftPower);
+            robot.log("Step9-Medium Lift level");
+
+            //Step 10
+            driveToPosition("backward", 0.4f, distanceToConeStack);
+            robot.log("Step10-Drive distanceToConeStack backwards");
+
+            //Step 11
+            robot.driveWithoutEncoder();
+            rotateToAngle(135, rotateSpeed);
+            robot.driveWithEncoder();
+            robot.log("Step11-Rotate 135 degrees counter clockwise.");
+
+            //Step 12
+            driveToPosition("forward", 0.3f, distanceToJunction);
+            robot.log("Step12-Drive distanceToJunction");
+
+            //Step 13
+            robot.clawOpen();
+            robot.clawClose();
+
+            //Step 14
+            driveToPosition("backward", 0.4f, distanceToJunction);
+            robot.log("Step14-Drive distanceToJunction backwards");
+
+            //Step 15
+            moveLiftBlocking(coneStackLevel, liftPower);
+            robot.log("Step15-Lift to cone stack level");
+
+            //Step 16
+            robot.driveWithoutEncoder();
+            rotateToAngle(135, rotateSpeed);
+            robot.driveWithEncoder();
+            robot.log("Step16-Rotate 135 degrees counter clockwise.");
+
+            //Step 17
+            moveLiftBlocking(ground, liftPower);
+            robot.log("Step17-Lift to ground (0 ticks)");
+
+            //Step 18
+            robot.driveWithoutEncoder();
+            rotateToAngle(-90, rotateSpeed);
+            robot.driveWithEncoder();
+            robot.log("Step18-Rotate 90 degrees clockwise.");
         }
 
-        robot.destroy();
+        /* WE ARE AT PARKING POSITION */
+        robot.log("WE DID IT! :D");
+    }
+
+    // stop all the motors
+    public void stopMotors() {
+        robot.topRight.setPower(0);
+        robot.bottomRight.setPower(0);
+        robot.topLeft.setPower(0);
+        robot.bottomLeft.setPower(0);
     }
 
     public void resetAngle() {
@@ -289,10 +492,8 @@ public class AutoLeft extends LinearOpMode {
         Orientation angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
 
-        if (deltaAngle < -180)
-            deltaAngle += 360;
-        else if (deltaAngle > 180)
-            deltaAngle -= 360;
+        if (deltaAngle < -180) deltaAngle += 360;
+        else if (deltaAngle > 180) deltaAngle -= 360;
 
         globalAngle += deltaAngle;
 
