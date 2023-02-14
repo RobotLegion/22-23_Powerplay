@@ -210,7 +210,6 @@ public class Robot {
             // increment redSum by our new red color sensor reading
             redSum += colorSensor.red();
         }
-
         // return the average red value (redSum divided by the number of samples we take)
         return (double) redSum / (double) colorSensorSamples;
     }
