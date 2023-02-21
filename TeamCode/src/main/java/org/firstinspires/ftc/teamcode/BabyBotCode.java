@@ -15,26 +15,43 @@ import com.qualcomm.robotcore.util.Range;
 public class BabyBotCode extends LinearOpMode {
 
 
+    double driveSpeed = 1.0;
+    double speedFactor;
+    float armSpeed = 0.5f;
+
+    // setup robot class
+    Robot robot = new Robot();
+
     @Override
     public void runOpMode() throws InterruptedException {
 
+        DcMotor left = hardwareMap.dcMotor.get("Left");
+        DcMotor right = hardwareMap.dcMotor.get("Right");
+        DcMotor Arm = hardwareMap.dcMotor.get("Arm");
         // initalize robot
         init(hardwareMap);
 
         //Setup Controller
         GamepadEx myGamepad1 = new GamepadEx(gamepad1);
 
+        float gamepad1LeftY = 0;
+        float gamepad1LeftX = 0;
+        float gamepad1RightX = 0;
+        float gamepad1RightY = 0;
+
         telemetry.addLine("Waiting for start...");
         telemetry.update();
         waitForStart();
 
-        float gamepad1LeftY = 0;
-        float gamepad1LeftX = 0;
-        float gamepad1RightX = 0;
+
         while (opModeIsActive()) {
+
             // read current gamepad values
             gamepad1LeftY = gamepad1.left_stick_y;
             gamepad1LeftX = -gamepad1.left_stick_x;
+            gamepad1RightY = -gamepad1.right_stick_y;
+            gamepad1RightX = -gamepad1.right_stick_x;
+
 
             telemetry.addLine("Running");
             telemetry.update();
@@ -44,52 +61,57 @@ public class BabyBotCode extends LinearOpMode {
 
             // CLAW
             if (myGamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.05) {
-                clawClose();
+                robot.clawClose();
             } else if (myGamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
-                clawOpen();
+                robot.clawOpen();
             }
+
+            //Arm
+            if (myGamepad1.wasJustPressed(GamepadKeys.Button.Y)) {
+                Arm.setPower(armSpeed);
+            } else if (myGamepad1.wasJustPressed(GamepadKeys.Button.A)) {
+                Arm.setPower(-armSpeed);
+            } else {
+                Arm.setPower(0.0);
+            }
+
+            //Drivetrain Formulas
+            double RightSpeed = gamepad1LeftY + gamepad1LeftX + gamepad1RightX;           //Combines the inputs of the sticks to clip their output to a value between 1 and -1
+            double LeftSpeed = -gamepad1LeftY + gamepad1LeftX + gamepad1RightX;          //Combines the inputs of the sticks to clip their output to a value between 1 and -1
+            double LeftCorrectedSpeed = Range.clip(Math.pow(RightSpeed, 3), -driveSpeed, driveSpeed);    //Slows down the motor and sets its max/min speed to the double "speed"
+            double RightCorrectedSpeed = Range.clip(Math.pow(LeftSpeed, 3), -driveSpeed, driveSpeed);     //Slows down the motor and sets its max/min speed to the double "speed"
+
+            if (myGamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
+                speedFactor = 0.8;
+            } else {
+                speedFactor = 0.5;
+            }
+            right.setPower(gamepad1RightY * speedFactor);
+            left.setPower(gamepad1LeftY * speedFactor);
         }
 
-        double speed = 0.5;
-
-        //Drivetrain Formulas
-        double RightSpeed = gamepad1LeftY + gamepad1LeftX + gamepad1RightX;           //Combines the inputs of the sticks to clip their output to a value between 1 and -1
-        double LeftSpeed = -gamepad1LeftY + gamepad1LeftX + gamepad1RightX;          //Combines the inputs of the sticks to clip their output to a value between 1 and -1
-//        double LeftCorrectedSpeed = Range.clip(Math.pow(RightSpeed, 3), -speed, speed);    //Slows down the motor and sets its max/min speed to the double "speed"
-//        double RightCorrectedSpeed = Range.clip(Math.pow(LeftSpeed, 3), -speed, speed);     //Slows down the motor and sets its max/min speed to the double "speed"
 
     }
 
-    public void init(HardwareMap hardwareMap){
+
+//    public void setDrivePower(double speed) {
+//       right.setPower(speed);
+//       left.setPower(speed);
+//    }
+
+
+    public void init(HardwareMap hardwareMap) {
 
         double clawOpenPosition = 0.0;
         double clawClosePosition = 1.0;
 
         // initalize drive train
-        DcMotor right = hardwareMap.dcMotor.get("Right");
         DcMotor left = hardwareMap.dcMotor.get("Left");
+        DcMotor right = hardwareMap.dcMotor.get("Right");
 
         // initalize claw
         Servo clawServo = hardwareMap.servo.get("clawServo");
         clawServo.scaleRange(clawOpenPosition, clawClosePosition);
-
-        // initalize lift
-        DcMotor lift = hardwareMap.dcMotor.get("lift");
-    }
-
-    //Claw Functions
-    public void clawOpen(){
-
-    }
-
-    public void clawClose() {
-
-    }
-//    public boolean isClawOpen() {
-//       // return clawServo.getPosition() < 0.5;
-//    }
-
-    public void lift(){
 
     }
 
