@@ -5,8 +5,10 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
 
 //WIFI- Robotics Password- 0145
@@ -17,7 +19,7 @@ public class BabyBotCode extends LinearOpMode {
 
     double driveSpeed = 1.0;
     double speedFactor;
-    float armSpeed = 0.5f;
+    float armSpeed = 0.1f;
 
     // setup robot class
     Robot robot = new Robot();
@@ -28,8 +30,15 @@ public class BabyBotCode extends LinearOpMode {
         DcMotor left = hardwareMap.dcMotor.get("Left");
         DcMotor right = hardwareMap.dcMotor.get("Right");
         DcMotor Arm = hardwareMap.dcMotor.get("Arm");
+        Servo clawServo = hardwareMap.servo.get("clawServo");
+        DigitalChannel limitSwitch = hardwareMap.get(DigitalChannel.class, "switch");
+
+
+        limitSwitch.setMode(DigitalChannel.Mode.INPUT);
+
+
         // initalize robot
-        init(hardwareMap);
+       // init(hardwareMap);
 
         //Setup Controller
         GamepadEx myGamepad1 = new GamepadEx(gamepad1);
@@ -38,6 +47,9 @@ public class BabyBotCode extends LinearOpMode {
         float gamepad1LeftX = 0;
         float gamepad1RightX = 0;
         float gamepad1RightY = 0;
+
+        double clawOpenPosition = 0.0;
+        double clawClosePosition = 1.0;
 
         telemetry.addLine("Waiting for start...");
         telemetry.update();
@@ -52,7 +64,6 @@ public class BabyBotCode extends LinearOpMode {
             gamepad1RightY = -gamepad1.right_stick_y;
             gamepad1RightX = -gamepad1.right_stick_x;
 
-
             telemetry.addLine("Running");
             telemetry.update();
 
@@ -60,21 +71,24 @@ public class BabyBotCode extends LinearOpMode {
             myGamepad1.readButtons();
 
             // CLAW
-            if (myGamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.05) {
-                robot.clawClose();
-            } else if (myGamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
-                robot.clawOpen();
+            if (myGamepad1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+                clawServo.setPosition(clawClosePosition);
+            } else if (myGamepad1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+                clawServo.setPosition(clawOpenPosition);
             }
 
             //Arm
-            if (myGamepad1.wasJustPressed(GamepadKeys.Button.Y)) {
+            if (myGamepad1.getButton(GamepadKeys.Button.Y)) {
                 Arm.setPower(armSpeed);
-            } else if (myGamepad1.wasJustPressed(GamepadKeys.Button.A)) {
+            } else if (myGamepad1.getButton(GamepadKeys.Button.A) && (limitSwitch.getState())) {
                 Arm.setPower(-armSpeed);
             } else {
-                Arm.setPower(0.0);
+                Arm.setPower(0.0f);
             }
 
+           if (!limitSwitch.getState()) {
+               telemetry.addLine("Hi");
+           }
             //Drivetrain Formulas
             double RightSpeed = gamepad1LeftY + gamepad1LeftX + gamepad1RightX;           //Combines the inputs of the sticks to clip their output to a value between 1 and -1
             double LeftSpeed = -gamepad1LeftY + gamepad1LeftX + gamepad1RightX;          //Combines the inputs of the sticks to clip their output to a value between 1 and -1
@@ -90,29 +104,28 @@ public class BabyBotCode extends LinearOpMode {
             left.setPower(gamepad1LeftY * speedFactor);
         }
 
+        telemetry.addData("switch", limitSwitch.getState());
+        telemetry.update();
 
     }
 
 
-//    public void setDrivePower(double speed) {
-//       right.setPower(speed);
-//       left.setPower(speed);
+//    public void init(HardwareMap hardwareMap) {
+//
+//        double clawOpenPosition = 0.0;
+//        double clawClosePosition = 1.0;
+
+//        // initialize drive train
+//        DcMotor left = hardwareMap.dcMotor.get("Left");
+//        DcMotor right = hardwareMap.dcMotor.get("Right");
+//
+//        //initialize arm
+//        DcMotor Arm = hardwareMap.dcMotor.get("Arm");
+//
+//        // initialize claw
+//        Servo clawServo = hardwareMap.servo.get("clawServo");
+//        clawServo.scaleRange(clawOpenPosition, clawClosePosition);
+
 //    }
-
-
-    public void init(HardwareMap hardwareMap) {
-
-        double clawOpenPosition = 0.0;
-        double clawClosePosition = 1.0;
-
-        // initalize drive train
-        DcMotor left = hardwareMap.dcMotor.get("Left");
-        DcMotor right = hardwareMap.dcMotor.get("Right");
-
-        // initalize claw
-        Servo clawServo = hardwareMap.servo.get("clawServo");
-        clawServo.scaleRange(clawOpenPosition, clawClosePosition);
-
-    }
 
 }
