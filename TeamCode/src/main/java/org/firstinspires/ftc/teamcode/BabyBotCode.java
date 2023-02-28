@@ -33,12 +33,8 @@ public class BabyBotCode extends LinearOpMode {
         Servo clawServo = hardwareMap.servo.get("clawServo");
         DigitalChannel limitSwitch = hardwareMap.get(DigitalChannel.class, "switch");
 
-
         limitSwitch.setMode(DigitalChannel.Mode.INPUT);
 
-
-        // initalize robot
-       // init(hardwareMap);
 
         //Setup Controller
         GamepadEx myGamepad1 = new GamepadEx(gamepad1);
@@ -64,9 +60,6 @@ public class BabyBotCode extends LinearOpMode {
             gamepad1RightY = -gamepad1.right_stick_y;
             gamepad1RightX = -gamepad1.right_stick_x;
 
-            telemetry.addLine("Running");
-            telemetry.update();
-
             // update gamepad extension state
             myGamepad1.readButtons();
 
@@ -86,15 +79,17 @@ public class BabyBotCode extends LinearOpMode {
                 Arm.setPower(0.0f);
             }
 
+            //When limitSwitch is default true, so when limitSwitch is false, it is being pressed on.
+            //Hi! should display when limitSwitch is pressed on
            if (!limitSwitch.getState()) {
-               telemetry.addLine("Hi");
+               telemetry.addLine("Hi!");
            }
+
             //Drivetrain Formulas
             double RightSpeed = gamepad1LeftY + gamepad1LeftX + gamepad1RightX;           //Combines the inputs of the sticks to clip their output to a value between 1 and -1
             double LeftSpeed = -gamepad1LeftY + gamepad1LeftX + gamepad1RightX;          //Combines the inputs of the sticks to clip their output to a value between 1 and -1
-            double LeftCorrectedSpeed = Range.clip(Math.pow(RightSpeed, 3), -driveSpeed, driveSpeed);    //Slows down the motor and sets its max/min speed to the double "speed"
-            double RightCorrectedSpeed = Range.clip(Math.pow(LeftSpeed, 3), -driveSpeed, driveSpeed);     //Slows down the motor and sets its max/min speed to the double "speed"
 
+            //Speedup trigger
             if (myGamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05) {
                 speedFactor = 0.8;
             } else {
@@ -108,24 +103,4 @@ public class BabyBotCode extends LinearOpMode {
         telemetry.update();
 
     }
-
-
-//    public void init(HardwareMap hardwareMap) {
-//
-//        double clawOpenPosition = 0.0;
-//        double clawClosePosition = 1.0;
-
-//        // initialize drive train
-//        DcMotor left = hardwareMap.dcMotor.get("Left");
-//        DcMotor right = hardwareMap.dcMotor.get("Right");
-//
-//        //initialize arm
-//        DcMotor Arm = hardwareMap.dcMotor.get("Arm");
-//
-//        // initialize claw
-//        Servo clawServo = hardwareMap.servo.get("clawServo");
-//        clawServo.scaleRange(clawOpenPosition, clawClosePosition);
-
-//    }
-
 }

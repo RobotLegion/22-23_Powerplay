@@ -50,7 +50,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
  * is explained below.
  */
 @TeleOp(name = "Concept: TensorFlow Object Detection Webcam", group = "Concept")
-@Disabled
+//@Disabled
 public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
 
     /*
@@ -70,6 +70,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
             "3 Panel"
     };
 
+
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
      * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
@@ -82,8 +83,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
      * Once you've obtained a license key, copy the string from the Vuforia web site
      * and paste it in to your code on the next line, between the double quotes.
      */
-    private static final String VUFORIA_KEY =
-            " -- YOUR NEW VUFORIA KEY GOES HERE  --- ";
+    private static final String VUFORIA_KEY = "ATl0kvH/////AAABmZ7AJneFGU4qkn4fb11DjyRFsHiVCt8H7OoQ62JtySyvvz4D/CacRhDM/c4/3BA5d5hYTVpyFOUG/yNMSTTMEnD3fJ9BsazBm3sNHE6L+e9NljWrVEn4fJdvDcIcPuQcmdpTvRayETCivFRhhSVdq3oztVT+fmWqPzYuVk4o4h6kvowLAyExQB5+lsMKyji8lOSZpIwKrKwcoHRCTbdmFopTssf51IOqaE+aSpUFmG5OK6znUw9+GDd6FaAV32FhDkXYyIbG/6MxlhxJfLJ09mRO2FKjFn864hV/H6RBn4+t8XdBtjGIYNcl6GkzRvD/DKT+1VidboyZ2BSKvFmMhUvIXUX9ljnsGiQ+/JcdhSB1";
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -132,27 +132,36 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
                     // the last time that call was made.
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
-                        telemetry.addData("# Objects Detected", updatedRecognitions.size());
+                        telemetry.addData("# Object Detected", updatedRecognitions.size());
 
-                        // step through the list of recognitions and display image position/size information for each one
-                        // Note: "Image number" refers to the randomized image orientation/number
+                        // step through the list of recognitions and display boundary info.
+                        int i = 0;
+                        boolean isDuckDetected = false;
                         for (Recognition recognition : updatedRecognitions) {
-                            double col = (recognition.getLeft() + recognition.getRight()) / 2 ;
-                            double row = (recognition.getTop()  + recognition.getBottom()) / 2 ;
-                            double width  = Math.abs(recognition.getRight() - recognition.getLeft()) ;
-                            double height = Math.abs(recognition.getTop()  - recognition.getBottom()) ;
+                            telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
+                            telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
+                                    recognition.getLeft(), recognition.getTop());
+                            telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
+                                    recognition.getRight(), recognition.getBottom());
+                            i++;
 
-                            telemetry.addData(""," ");
-                            telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100 );
-                            telemetry.addData("- Position (Row/Col)","%.0f / %.0f", row, col);
-                            telemetry.addData("- Size (Width/Height)","%.0f / %.0f", width, height);
+                            // check label to see if the camera now sees a Duck
+                            if (recognition.getLabel().equals("Duck")) {            //  ** ADDED **
+                                isDuckDetected = true;                             //  ** ADDED **
+                                telemetry.addData("Object Detected", "Duck");      //  ** ADDED **
+                            } else {                                               //  ** ADDED **
+                                isDuckDetected = false;                            //  ** ADDED **
+                            }
                         }
                         telemetry.update();
                     }
                 }
+                }
             }
+        if (tfod != null) {
+            tfod.shutdown();
         }
-    }
+        }
 
     /**
      * Initialize the Vuforia localization engine.
