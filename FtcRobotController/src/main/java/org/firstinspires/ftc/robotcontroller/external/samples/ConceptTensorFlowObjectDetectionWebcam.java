@@ -60,17 +60,16 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
      * has been downloaded to the Robot Controller's SD FLASH memory, it must to be loaded using loadModelFromFile()
      * Here we assume it's an Asset.    Also see method initTfod() below .
      */
-    private static final String TFOD_MODEL_ASSET = "PowerPlay.tflite";
     // private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/CustomTeamModel.tflite";
 
+    private static final String TFOD_MODEL_ASSET = "PowerPlay.tflite";
+    // private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/CustomTeamModel.tflite";
 
     private static final String[] LABELS = {
             "1 Bolt",
             "2 Bulb",
             "3 Panel"
     };
-
-
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
      * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
@@ -99,8 +98,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
-        // first.
+        // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that first.
         initVuforia();
         initTfod();
 
@@ -126,42 +124,69 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
+//            while (opModeIsActive()) {
+//                if (tfod != null) {
+//                    // getUpdatedRecognitions() will return null if no new information is available since
+//                    // the last time that call was made.
+//                    List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+//                    if (updatedRecognitions != null) {
+//                        telemetry.addData("# Object Detected", updatedRecognitions.size());
+//
+//                        // step through the list of recognitions and display boundary info.
+//                        int i = 0;
+//                        boolean isDuckDetected = false;
+//                        for (Recognition recognition : updatedRecognitions) {
+//                            telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
+//                            telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
+//                                    recognition.getLeft(), recognition.getTop());
+//                            telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
+//                                    recognition.getRight(), recognition.getBottom());
+//                            i++;
+//
+//                            // check label to see if the camera now sees a Duck
+//                            if (recognition.getLabel().equals("Duck")) {            //  ** ADDED **
+//                                isDuckDetected = true;                             //  ** ADDED **
+//                                telemetry.addData("Object Detected", "Duck");      //  ** ADDED **
+//                            } else {                                               //  ** ADDED **
+//                                isDuckDetected = false;                            //  ** ADDED **
+//                            }
+//                        }
+//                        telemetry.update();
+//                    }
+//                }
+//                }
             while (opModeIsActive()) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
-                        telemetry.addData("# Object Detected", updatedRecognitions.size());
+                        telemetry.addData("# Objects Detected", updatedRecognitions.size());
 
-                        // step through the list of recognitions and display boundary info.
-                        int i = 0;
-                        boolean isDuckDetected = false;
+                        // step through the list of recognitions and display image position/size information for each one
+                        // Note: "Image number" refers to the randomized image orientation/number
                         for (Recognition recognition : updatedRecognitions) {
-                            telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
-                            telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
-                                    recognition.getLeft(), recognition.getTop());
-                            telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
-                                    recognition.getRight(), recognition.getBottom());
-                            i++;
+                            double col = (recognition.getLeft() + recognition.getRight()) / 2 ;
+                            double row = (recognition.getTop()  + recognition.getBottom()) / 2 ;
+                            double width  = Math.abs(recognition.getRight() - recognition.getLeft()) ;
+                            double height = Math.abs(recognition.getTop()  - recognition.getBottom()) ;
 
-                            // check label to see if the camera now sees a Duck
-                            if (recognition.getLabel().equals("Duck")) {            //  ** ADDED **
-                                isDuckDetected = true;                             //  ** ADDED **
-                                telemetry.addData("Object Detected", "Duck");      //  ** ADDED **
-                            } else {                                               //  ** ADDED **
-                                isDuckDetected = false;                            //  ** ADDED **
-                            }
+                            telemetry.addData(""," ");
+                            telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100 );
+                            telemetry.addData("- Position (Row/Col)","%.0f / %.0f", row, col);
+                            telemetry.addData("- Size (Width/Height)","%.0f / %.0f", width, height);
                         }
                         telemetry.update();
                     }
                 }
-                }
             }
+        }
         if (tfod != null) {
             tfod.shutdown();
         }
-        }
+
+
+    }
 
     /**
      * Initialize the Vuforia localization engine.
@@ -179,12 +204,21 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
     }
 
-    /**
-     * Initialize the TensorFlow Object Detection engine.
-     */
+//    private void initTfod() {
+//        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+//                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+//        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+//        tfodParameters.minResultConfidence = 0.8f;
+//        tfodParameters.isModelTensorFlow2 = true;
+//        tfodParameters.useObjectTracker = true;
+//        tfodParameters.inputSize = 320;
+//        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+//        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
+//    }
+
     private void initTfod() {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-            "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfodParameters.minResultConfidence = 0.75f;
         tfodParameters.isModelTensorFlow2 = true;
