@@ -19,7 +19,9 @@ public class BabyBotCode extends LinearOpMode {
 
     double driveSpeed = 1.0;
     double speedFactor;
-    float armSpeed = 0.1f;
+    float armSpeed = 0.2f;
+    float armDownSpeed = 0.1f; //Make sure armDownSpeed always is less than armSpeed
+    boolean armReady = true;
 
     // setup robot class
     Robot robot = new Robot();
@@ -71,14 +73,39 @@ public class BabyBotCode extends LinearOpMode {
             }
 
             //Arm
-            if (myGamepad1.getButton(GamepadKeys.Button.Y)) {
+            //UNTESTED!
+
+            if (myGamepad1.getButton(GamepadKeys.Button.Y) && armReady) {
                 Arm.setPower(armSpeed);
-            } else if (myGamepad1.getButton(GamepadKeys.Button.A) && (limitSwitch.getState())) {
-                Arm.setPower(-armSpeed);
+                sleep(1000);
+                Arm.setPower(0.0);
+                armReady = false;
+            } else if (myGamepad1.getButton(GamepadKeys.Button.Y) && !armReady) {
+                Arm.setPower(-armDownSpeed);
+                sleep(2000);
+                Arm.setPower(0.0);
+                armReady = true;
             } else {
-                Arm.setPower(0.0f);
+                Arm.setPower(0.0);
             }
 
+            //Objective for Camera:
+            // Make new targets for the camera to view. Allow arm to swing if a target is in view and from the right distance.
+            //If a target is not in the right distance or in camera view, do not allow the arm to swing.
+            //Do not allow the arm to swing because otherwise it will be off target.
+            //Make a button to press to make the robot go left until it meets the requirements to shoot.
+            // Auto shoot when the right distance and target is in view.
+
+            double correctDistance = 0.0; //Correct distance
+//            if (targetInView && correctDistance) {
+//                boolean allowedSwing = true;
+//            } else {
+//                boolean allowedSwing = false;
+//            }
+
+//            boolean allowedSwing = true;
+//
+//
             //When limitSwitch is default true, so when limitSwitch is false, it is being pressed on.
             //Hi! should display when limitSwitch is pressed on
            if (!limitSwitch.getState()) {

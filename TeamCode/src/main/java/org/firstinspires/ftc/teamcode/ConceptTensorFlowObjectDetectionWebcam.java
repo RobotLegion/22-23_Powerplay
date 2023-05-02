@@ -29,9 +29,13 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.os.Environment;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import java.io.File;
 import java.util.List;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -62,9 +66,10 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
      */
     // private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/CustomTeamModel.tflite";
 
-    private static final String TFOD_MODEL_ASSET = "/sdcard/Robotics/FIRST22-23_Powerplay/FTCRobotController/src/main/assets/duck.tflite";
-    // private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/CustomTeamModel.tflite";
+    private static final String TFOD_MODEL_ASSET = String.format("%s/FIRST/duck.tflite",
+            Environment.getExternalStorageDirectory().getAbsolutePath());
 
+//    private static final String TFOD_MODEL_ASSET = "/storage/emulated/0/FIRST/tflitemodels/duck.tflite";
     private static final String[] LABELS = {
             "duck",
     };
@@ -96,6 +101,15 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+
+//        File[] files = new File(TFOD_MODEL_ASSET).listFiles();
+//        telemetry.addLine("Files:");
+//        for (int i = 0; i < files.length; i++)
+//        {
+//            telemetry.addData("FileName:", files[i].getName());
+//        }
+//        telemetry.update();
+
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that first.
         initVuforia();
         initTfod();
@@ -225,7 +239,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
 
         // Use loadModelFromAsset() if the TF Model is built in as an asset by Android Studio
         // Use loadModelFromFile() if you have downloaded a custom team model to the Robot Controller's FLASH.
-        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
+        tfod.loadModelFromFile(TFOD_MODEL_ASSET, LABELS);
         // tfod.loadModelFromFile(TFOD_MODEL_FILE, LABELS);
     }
 }
