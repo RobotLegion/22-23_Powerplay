@@ -100,7 +100,7 @@ public class BabyBotCode extends LinearOpMode {
             //Arm
             if (!Arm.isBusy()){
                 if (myGamepad1.wasJustPressed(GamepadKeys.Button.Y) && armReady) {
-                    int tickTarget = (int) ((7.0*20.0));// divide by 3 - coach jon said so. The motor does about a 45 degree turn.
+                    int tickTarget = (int) ((7.0*160.0)/3);//Full rotation= 160*7 ticks Divide by 3 to get a third of a turn.
                     Arm.setTargetPosition(tickTarget);
 
                     // tell motors to run to target position
