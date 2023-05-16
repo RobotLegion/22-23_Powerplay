@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
+import java.util.Timer;
+import java.util.TimerTask;
 
 //WIFI- Robotics Password- 0145
 
@@ -19,9 +21,9 @@ public class BabyBotCode extends LinearOpMode {
 
     double driveSpeed = 1.0;
     double speedFactor;
-    float armSpeed = 0.2f;
-    float armDownSpeed = 0.1f; //Make sure armDownSpeed always is less than armSpeed
-    boolean armReady = true;
+    float armSpeed = 0.5f;
+    float armDownSpeed = 0.2f; //Make sure armDownSpeed always is less than armSpeed
+    long start = 0;
 
     // setup robot class
     Robot robot = new Robot();
@@ -99,27 +101,19 @@ public class BabyBotCode extends LinearOpMode {
 
             //Arm
             if (!Arm.isBusy()){
-                if (myGamepad1.wasJustPressed(GamepadKeys.Button.Y) && armReady) {
-                    int tickTarget = (int) ((7.0*160.0)/3);//Full rotation= 160*7 ticks Divide by 3 to get a third of a turn.
-                    Arm.setTargetPosition(tickTarget);
-
-                    // tell motors to run to target position
-                    Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                if (myGamepad1.wasJustPressed(GamepadKeys.Button.Y)) {
+                     start = System.currentTimeMillis();
                     Arm.setPower(armSpeed);
-                    telemetry.addData("TicksUP", Arm.getCurrentPosition());
+                    telemetry.addLine("Going up");
                     telemetry.update();
-                    armReady = false;
-                } else if (myGamepad1.wasJustPressed(GamepadKeys.Button.Y) && !armReady) {
-                    int tickTarget = (int) (0);
-                    Arm.setTargetPosition(tickTarget);
-
-                    // tell motors to run to target position
-                    Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    Arm.setPower(armDownSpeed);
-                    telemetry.addData("TicksDOWN", Arm.getCurrentPosition());
-                    telemetry.update();
-                    armReady = true;
                 } else {
+                    Arm.setPower(0.0);
+                    telemetry.addData("stopping", Arm.getCurrentPosition());
+                    telemetry.update();
+                }
+            } else {
+                long elapsedTime = System.currentTimeMillis()-start;
+                if (elapsedTime>1000) {
                     Arm.setPower(0.0);
                     telemetry.addData("stopping", Arm.getCurrentPosition());
                     telemetry.update();
